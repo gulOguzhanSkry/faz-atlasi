@@ -155,3 +155,11 @@ The code and file names are in Turkish; the comments in each file explain what i
 - Steel composition ranges are the heat-analysis ranges from the relevant EN/ISO standards.
 
 Faz Atlası code is released under the [MIT License](LICENSE); the data notice for the isopleths is in [NOTICE](NOTICE).
+# Additions in this fork
+
+This is Oğuzhan Gül's fork of [Faz Atlası by acarcemal](https://github.com/acarcemal/faz-atlasi). The original CALPHAD data, author attribution, MIT licence and data notices remain intact.
+
+The new **microstructure constituents** panel partitions the source solver's phase masses along an explicitly assumed slow, metastable Fe–Fe₃C cooling path. It includes pearlite, primary/secondary/tertiary cementite and ledeburite ancestry, an inspectable calculation, and explicit ξ progress at exact invariant temperatures. It is bilingual, works offline and requires no build step. It does not predict kinetics, graphite-bearing equilibrium or the actual morphology of a processed part. Development tests run with `npm ci && npm test`; these tools are not needed to use `web/index.html`.
+
+See [the implementation and acceptance notes](docs/OG_ADDITIONS.md).
+

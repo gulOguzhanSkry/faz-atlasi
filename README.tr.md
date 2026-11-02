@@ -156,3 +156,11 @@ ve çelik dışı elementleri ayıklar.
 
 
 Faz Atlası kodu [MIT lisansı](LICENSE) ile yayımlanmıştır; kesit verilerine ait veri notu [NOTICE](NOTICE) dosyasındadır.
+# Bu fork'taki eklemeler
+
+Bu depo, [acarcemal'in Faz Atlası](https://github.com/acarcemal/faz-atlasi) projesinin Oğuzhan Gül tarafından geliştirilen fork'udur. Özgün CALPHAD verisi, yazar atfı, MIT lisansı ve veri kaynak bildirimleri korunmuştur.
+
+Yeni **mikroyapı bileşenleri** paneli, kaynak çözücünün faz miktarlarını açıkça belirtilen yavaş, metastabil Fe–Fe₃C soğuma geçmişine göre ayırır. Perlit, birincil/ikincil/tersiyer sementit ve ledeburit kökenlerini, incelenebilir hesapları ve tam değişmez sıcaklıklarda ξ ilerlemesini gösterir. İki dilli ve çevrimdışıdır; uygulamanın derlenmesi gerekmez. Kinetik, grafitli kararlı denge veya gerçek bir parçanın işlem sonrası morfolojisi tahmin edilmez. Geliştirme testleri `npm ci && npm test` ile çalışır; `web/index.html` kullanımı için bu araçlar gerekmez.
+
+[Uygulama ve kabul notları](docs/OG_ADDITIONS.md).
+

@@ -27,6 +27,68 @@ function t(k, p = {}) {
   return String(s).replace(/\{(\w+)\}/g, (_, n) => (p[n] != null ? p[n] : ''));
 }
 
+/* OG fork: source-aware, slow-cooling constituent panel (MIT). */
+sozlukEkle({
+ 'bilesen.title':['Mikroyapı bileşenleri','Microstructure constituents'],
+ 'bilesen.assumption':['Yavaş denge soğuması','Slow equilibrium cooling'],
+ 'bilesen.mass':['Kütle payları','Mass fractions'],
+ 'bilesen.inner':['Bileşenin kendi içindeki faz payları','Phase fractions within this constituent'],
+ 'bilesen.method':['Kaldıraç kuralı hesabı ve varsayımlar','Lever-rule calculation and assumptions'],
+ 'bilesen.alloy':['Bileşen hesabı yalnız ikili Fe–Fe₃C içindir. Alaşımlı kesit veya ampirik alaşım etkisi etkin olduğundan kapalıdır.','Constituents apply only to binary Fe–Fe₃C. Disabled for alloy isopleths or active empirical alloy corrections.'],
+ 'bilesen.unavailable':['Bu noktada kapalı bir kütle dengesi kurulamadı. Bileşen yüzdeleri gösterilmiyor.','A closed mass balance could not be established here. Constituent percentages are withheld.'],
+ 'bilesen.progress':['{event}: dönüşüm ilerlemesi ξ','{event}: transformation progress ξ'],
+ 'bilesen.progressNote':['Tam değişmez sıcaklıkta bileşim ve sıcaklık tek bir oran belirlemez. Başlangıç (ξ=0) ile son (ξ=1) arasında bir ilerleme seçin. ξ süre değildir.','At the exact invariant, composition and temperature do not determine unique fractions. Choose progress between start (ξ=0) and finish (ξ=1). ξ is not time.'],
+ 'bilesen.progressInput':['Dönüşüm ilerlemesi, 0 ile 1 arasında','Transformation progress, from 0 to 1'],
+ 'bilesen.chooseProgress':['Oranları görmek için ξ seçin.','Choose ξ to resolve the fractions.'],
+ 'bilesen.start':['Başlangıcı göster · ξ=0','Show start · ξ=0'],
+ 'bilesen.event.eutectoid':['Ötektoid','Eutectoid'],
+ 'bilesen.event.eutectic':['Ötektik','Eutectic'],
+ 'bilesen.event.peritectic':['Peritektik','Peritectic'],
+ 'bilesen.part.proeutectoid-ferrite':['Ötektoid öncesi ferrit','Proeutectoid ferrite'],
+ 'bilesen.part.ferrite':['Ferrit','Ferrite'],
+ 'bilesen.part.tertiary-cementite':['Tersiyer sementit · Fe₃C(III)','Tertiary cementite · Fe₃C(III)'],
+ 'bilesen.part.pearlite':['Perlit · α + Fe₃C','Pearlite · α + Fe₃C'],
+ 'bilesen.part.pearlite-alpha':['Ötektoidde perlit içi α','α within pearlite at the eutectoid'],
+ 'bilesen.part.secondary-cementite':['İkincil sementit · Fe₃C(II)','Secondary cementite · Fe₃C(II)'],
+ 'bilesen.part.austenite':['Östenit · γ','Austenite · γ'],
+ 'bilesen.part.primary-austenite':['Birincil östenit','Primary austenite'],
+ 'bilesen.part.ledeburite':['Ledeburit · γ + Fe₃C','Ledeburite · γ + Fe₃C'],
+ 'bilesen.part.transformed-ledeburite':['Dönüşmüş ledeburit','Transformed ledeburite'],
+ 'bilesen.part.primary-cementite':['Birincil sementit · Fe₃C(I)','Primary cementite · Fe₃C(I)'],
+ 'bilesen.part.cementite':['Sementit · köken ayrımı yapılmadı','Cementite · ancestry not assigned'],
+ 'bilesen.part.delta-ferrite':['δ-ferrit','δ-ferrite'],
+ 'bilesen.part.liquid':['Sıvı','Liquid'],
+ 'bilesen.note.history':['Sıvıdan seçili noktaya yavaş denge soğuması varsayılır; ısıtarak gelindiğinde de bu referans geçmiş kullanılır. Bileşen kökeni faz diyagramından tek başına ölçülemez. Toplam faz miktarları atlasın kendi çözücüsünden alınır.','Assumes slow equilibrium cooling from liquid to the selected point, also when the point is reached by heating. Constituent ancestry is not measured by the phase diagram alone. Total phase amounts come from the atlas solver.'],
+ 'bilesen.note.scope':['Perlit ve ledeburit ayrı termodinamik fazlar değildir. Grafit, beynit, martenzit, aşırı soğuma ve dönüşüm kinetiği bu modelde yoktur. Kütle payı hacim payı değildir.','Pearlite and ledeburite are not separate thermodynamic phases. Graphite, bainite, martensite, undercooling and transformation kinetics are outside this model. Mass fraction is not volume fraction.'],
+ 'bilesen.note.phases':['Katılaşma veya yüksek sıcaklık bölgesinde bileşenler mevcut fazlarla birebir gösterilir.','During solidification or at high temperature, constituents map directly to the present phases.'],
+ 'bilesen.note.above':['Ötektoid sıcaklığının üstünde perlit oluşmamıştır; varsa ötektoid öncesi ferrit veya ikincil sementit gösterilir.','Above the eutectoid, pearlite has not formed; proeutectoid ferrite or secondary cementite is shown where present.'],
+ 'bilesen.note.dilute':['Ötektoid ferrit çözünürlüğünün altında perlit yoktur. Soğumada ayrılan sementit tersiyer kökenlidir.','Below the eutectoid ferrite solubility there is no pearlite. Cementite rejected on cooling has tertiary ancestry.'],
+ 'bilesen.note.tertiary':['Ötektoid öncesi ferritten ayrılan tersiyer sementit ayrı gösterilir. Perlit içindeki ferritten ayrılan pay perlitin sementitine eklenir.','Tertiary cementite from proeutectoid ferrite is listed separately. Rejection from ferrite inside pearlite remains assigned to pearlite cementite.'],
+ 'bilesen.note.white-iron':['Metastabil Fe–Fe₃C hesabıdır: beyaz dökme demir referans yapısıdır; grafitli kararlı denge değildir.','This is metastable Fe–Fe₃C: a white-cast-iron reference structure, not graphite-bearing stable equilibrium.'],
+ 'bilesen.note.merged-secondary':['Ötektik östenitten ayrılan ikincil sementit ledeburitin içinde tutulur; ayrı köken sınıfı olarak gösterilmez.','Secondary cementite from eutectic austenite remains within ledeburite rather than being listed as a separate ancestry.'],
+ 'bilesen.note.eutectic-progress':['ξ arttıkça ötektik sıvı ledeburite dönüşür; önceden oluşmuş birincil katı miktarı korunur.','Increasing ξ converts eutectic liquid into ledeburite, preserving the pre-existing primary solid.'],
+ 'bilesen.note.eutectoid-progress':['ξ arttıkça östenit perlite dönüşür; ötektoid öncesi bileşen miktarı korunur.','Increasing ξ converts austenite into pearlite, preserving the proeutectoid constituent.'],
+ 'bilesen.note.cast-progress':['Ötektik kökenli bölgede kalan γ da aynı ξ ile dönüşür. Dönüşmüş ledeburit etiketi dönüşüm sürerken kalan γ’yı içerebilir; iç faz dökümünü kontrol edin.','Remaining eutectic γ transforms with the same ξ. During transformation, the transformed-ledeburite ancestry can still contain γ; inspect its phase breakdown.'],
+ 'bilesen.note.fallback':['Bu noktada bileşen kökeni ayrımı tutarlı kurulamadı; yalnız kaynak denge fazları gösterilir.','Constituent ancestry could not be partitioned consistently here; only source equilibrium phases are shown.'],
+ 'bilesen.source':['Bilimsel arka plan · Cambridge','Scientific background · Cambridge']
+});
+sozlukEkle({
+ 'bolge.toggle':['Mikroyapı bileşen bölgeleri ve P/S/E/C çizgileri','Microconstituent regions and P/S/E/C references'],
+ 'bolge.method':['Kesikli çizgiler ve etiketler nasıl okunur?','How to read the dashed references and labels'],
+ 'bolge.legend':['P/S/E/C dikeyleri değişmez bileşim referanslarıdır; faz sınırı değildir. İtalik adlar sıvıdan yavaş denge soğumasının bileşenlerini gösterir. P: perlit, Ld: ledeburit, Ld′: dönüşmüş ledeburit; θ(I)/(II): birincil/ikincil sementit. Etikete tıklayın veya Tab ile odaklanıp Enter’a basın. Dar görünümde sığmayan etiketler aşağıdaki listeden seçilebilir.','P/S/E/C verticals are invariant-composition references, not phase boundaries. Italic labels identify constituents along slow equilibrium cooling from liquid. P: pearlite, Ld: ledeburite, Ld′: transformed ledeburite; θ(I)/(II): primary/secondary cementite. Click a label or focus with Tab and press Enter. Labels omitted in narrow views remain selectable in the list below.'],
+ 'bolge.layer':['Yavaş soğuma bileşen bölgeleri','Slow-cooling constituent regions'],
+ 'bolge.reference':['Değişmez bileşim referansı, faz sınırı değil','Invariant-composition reference, not a phase boundary'],
+ 'bolge.select':['{name} · bölge ortasını seç','{name} · select the region centre'],
+ 'bolge.alloy':['Bileşen bölgeleri ve ikili referans çizgileri alaşımlı kesitte veya ampirik alaşım düzeltmesinde gösterilmez.','Constituent regions and binary reference lines are hidden for alloy isopleths or empirical alloy corrections.'],
+ 'bolge.invalid':['Referans bölgelerinin faz ve kütle dengesi kontrolü geçmedi; katman çizilmiyor.','Reference-region phase and mass-balance checks failed; this layer is withheld.'],
+ 'bolge.hypoeutectoid':['α + perlit','α + pearlite'],
+ 'bolge.hypereutectoid':['perlit + Fe₃C(II)','pearlite + Fe₃C(II)'],
+ 'bolge.hypoeutectic-cold':['perlit + Fe₃C(II) + dön. ledeburit','pearlite + Fe₃C(II) + transformed ledeburite'],
+ 'bolge.hypereutectic-cold':['dön. ledeburit + Fe₃C(I)','transformed ledeburite + Fe₃C(I)'],
+ 'bolge.hypoeutectic-warm':['γ + Fe₃C(II) + ledeburit','γ + Fe₃C(II) + ledeburite'],
+ 'bolge.hypereutectic-warm':['ledeburit + Fe₃C(I)','ledeburite + Fe₃C(I)']
+});
+
 /* ------------------------------------------------------------------ */
 /* Genel arayüz, diyagram ve ikili Fe–C paneli (app.js, index.html)    */
 /* ------------------------------------------------------------------ */

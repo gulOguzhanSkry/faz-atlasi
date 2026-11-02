@@ -1,0 +1,30 @@
+/* SPDX-License-Identifier: MIT — OG fork additions. */
+.bilesen-kart{min-width:0;flex:none;background:var(--yuzey);border:1px solid var(--cizgi);border-top:3px solid var(--vurgu);border-radius:12px;box-shadow:var(--kart-golge);padding:12px 14px}
+.bilesen-kart h3{overflow-wrap:anywhere}
+.bilesen-heading{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.bilesen-heading h3{font-size:14px;margin:0}
+.bilesen-kart .meta{white-space:normal;font-size:12px;color:var(--soluk)}
+.bilesen-body{font-size:13px;line-height:1.55}
+.bilesen-point{color:var(--soluk);font-size:11px;margin:10px 0}
+.bilesen-bar{display:flex;gap:2px;height:8px;border-radius:4px;overflow:hidden;margin:12px 0}
+.bilesen-bar i{min-width:0;flex-shrink:0}
+.bilesen-row{display:grid;grid-template-columns:9px minmax(0,1fr) auto;gap:7px;align-items:start;padding:9px 0;border-bottom:1px solid var(--cizgi)}
+.bilesen-row strong{font-variant-numeric:tabular-nums;white-space:nowrap}
+.bilesen-row small{grid-column:2/-1;color:var(--soluk);font-size:11px}
+.bilesen-dot{width:8px;height:8px;display:block;border-radius:50%;margin-top:6px}
+.bc-proeutectoid-ferrite,.bc-ferrite{background:var(--ph-A)}
+.bc-austenite,.bc-primary-austenite{background:var(--ph-G)}
+.bc-pearlite{background:#517a6c}.bc-ledeburite{background:#b76e99}
+.bc-transformed-ledeburite{background:#8576ae}.bc-secondary-cementite{background:#a8895c}
+.bc-primary-cementite,.bc-cementite{background:var(--ph-C)}.bc-tertiary-cementite{background:#78828e}
+.bc-liquid{background:var(--ph-L)}.bc-delta-ferrite{background:var(--ph-D)}
+.bilesen-method{margin-top:14px;color:var(--soluk);font-size:12px}
+.bilesen-method summary{cursor:pointer;min-height:44px;display:list-item;align-content:center;color:var(--metin);font-weight:600}
+.bilesen-method code{overflow-wrap:anywhere;white-space:normal;font-size:11px}
+.bilesen-method a{color:var(--vurgu)}
+.bilesen-progress{padding:12px;border:1px solid var(--cizgi);background:var(--yuzey-2);border-radius:8px;margin:12px 0}
+.bilesen-progress label{display:block;font-weight:600}.bilesen-progress input{display:block;width:100%;min-height:44px;accent-color:var(--vurgu)}
+.bilesen-progress output{display:block;font-variant-numeric:tabular-nums}
+.bilesen-progress button{min-height:44px;margin-top:8px;white-space:normal}
+.bilesen-kart :focus-visible{outline:2px solid var(--vurgu);outline-offset:3px}
+.bilesen-disabled{border-top-color:var(--cizgi)}

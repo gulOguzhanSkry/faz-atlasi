@@ -22,6 +22,8 @@ sunum/
 Thumbs.db
 desktop.ini
 .DS_Store
+node_modules/
+private/
 
 # Geçici test / görsel sayfaları
 web/_*.html
