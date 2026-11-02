@@ -18,9 +18,9 @@ Aynı yapıyı 3B kesitten atomik referans hücresine kadar keşfet.
 [English](README.md) &nbsp; · &nbsp;
 [Tanıtımı izle](https://guloguzhanskry.github.io/faz-atlasi/gorseller/mikroyapi-sogume.mp4)
 
-[![En yüksek 384 tane ayrıntısında, hesaplanmış sementit kütle paylarıyla sekiz Fe–C mikroyapısı](web/gorseller/readme-microstructures.webp)](web/gorseller/readme-microstructures.webp)
+[![En yüksek 384 tane ayrıntısında, hesaplanmış bileşen kütle paylarıyla sekiz Fe–C mikroyapısı](web/gorseller/readme-microstructures.webp)](web/gorseller/readme-microstructures.webp)
 
-<sub>384 tane · 512² dokular · kaynaktan hesaplanan sekiz durum · çevrimdışı şematik render; arayüz ekran görüntüsü veya ölçülmüş mikrograf değildir</sub>
+<sub>384 tane · bileşen renkleri, perlit ve ledeburit içindeki Fe₃C koyu tonla · ortak modelden çevrimdışı şematik render; arayüz ekran görüntüsü veya ölçülmüş mikrograf değildir</sub>
 
 </div>
 
@@ -37,6 +37,23 @@ Aynı yapıyı 3B kesitten atomik referans hücresine kadar keşfet.
 [900 ve 650 °C karşılaştırmasını büyük aç](web/gorseller/secim-mikroyapi.webp) · [Canlı uygulamada kendin dene](https://guloguzhanskry.github.io/faz-atlasi/?lang=tr)
 
 <sub>Bu görsel hesap bağlantısını anlatan şematik bir çizimdir; web arayüzünün ekran görüntüsü veya fiziksel dönüşüm süresi simülasyonu değildir. Faz payları hesaplanır; tanelerin ve lamellerin geometrisi şematiktir.</sub>
+
+## Gerçekçi kesit morfolojisi
+
+Miktarlar hesaplanır; **yerleşim artık genel lekeler yerine metalurjik morfolojiyi izler**. Her bileşen, oluşum biçimine uyan bir skor alanıyla yerleştirilir ve kaynak kütle bütçesi 3B hacimde yine tam olarak korunur.
+
+[![Altı hesaplanmış kesit: allotriomorf ferrit, ikincil sementit ağı, birincil östenit dendritleri, ledeburit içinde dönüşmüş dendritler, ötektik ledeburit ve birincil sementit levhaları](web/gorseller/readme-morphology.webp)](web/gorseller/readme-morphology.webp)
+
+| Yapı | Nasıl yerleştirilir |
+| :--- | :--- |
+| Ötektoid öncesi ferrit · Fe₃C(II) | Eski östenit tane sınırlarından büyür (allotriomorf / sürekli ağ); gürültüyle modüle edilmiş sınır uzaklığı kullanılır. |
+| Perlit | Tane başına 2–5 koloni; her koloninin kendi bükülmüş lamel yönü vardır. |
+| Birincil östenit | <100> dendritleri: gövde ve ikincil kollar kapsüllerin yumuşak birleşimidir; dönüşünce kenarlarında Fe₃C(II) oluşur. |
+| Ledeburit | Radyal ötektik koloniler: **sürekli sementit matrisinde** yönlenmiş, kesintili ve dışa doğru kabalaşan γ çubukları; ötektoid altında içlerinde ince lameller. |
+| Birincil sementit | Komşu tanelere uzanan uzun, sonlu levhalar. |
+| Tane sınırları | Yalnız bileşende gerçekten görünen yerde çizilir; ledeburit, birincil levhalar, sıvı ve dendritik dökümlerde çizilmez. |
+
+Bu seçimler 3B hacmin 2B kesitlerinde stereoloji testleriyle denetlenir: kesit alan kesirleri ortalamada çizim kütle bütçesine eşittir (Delesse, ±%4), ledeburitteki sementit matrisinin ≥%90'ı tek bağlı bölgedir, γ çubukları ve sementit levhaları uzundur, dendrit kesitleri dışbükey değildir, ferrit / Fe₃C(II) eski sınırlar üzerindedir. Yerleşim yine şematiktir: kinetik, tane boyutu veya lamel aralığı tahmin edilmez.
 
 ## Uygulamada ne göreceğim?
 
@@ -92,6 +109,7 @@ Kartlardaki bilgi düğmeleri kavramların ne anlama geldiğini açıklar. Yeni 
 - **İzlenebilir bileşen hesabı** — kaynak verinin değişmez bileşimleri, her bileşenin iç faz dökümü ve kaldıraç kuralı hesabı.
 - **Diyagramda ikinci bir okuma katmanı** — faz sınırlarından ayrı çizilen P/S/E/C bileşim referansları ve seçilebilir yavaş soğuma bileşen bölgeleri.
 - **Yeniden kullanılabilir 3B inceleyici** — yüzen giriş, korunan kamera ve seçim, kesit düzlemleri, faz/bileşen/tane renkleri ve atomik referans görünümü.
+- **Morfolojiye duyarlı yerleşim** — allotriomorf ferrit, perlit kolonileri, Fe₃C(II) ağları, <100> dendritler, sürekli sementit matrisinde ledeburit çubukları ve birincil sementit levhaları; hepsi kaynak bütçesinin tam içinde.
 - **Ortak 2B kesit** — küpün kendi kimlik haritası, göreli büyütme, temsili Nital görünümü, deterministik optik etkiler ve bilgi şeritli PNG çıktısı.
 - **Yeniden üretilebilir tanıtım** — aynı kaynak hesap ve geometriden üretilmiş, iki dilde kısa bir soğuma akışı.
 
@@ -107,6 +125,7 @@ Mobilde diyagram, okunmayacak kadar küçültülmek yerine geniş çalışma ala
 | İnceleme | İçerik |
 | :--- | :--- |
 | [Aynı hacim, üç görünüm](web/gorseller/readme-display-modes.webp) | En yüksek ayrıntıda sekiz hesap durumunun faz küpleri, bileşen küpleri ve dağlanmış kesitleri. |
+| [Kesit morfolojisi](web/gorseller/readme-morphology.webp) | Her bileşenin nasıl yerleştirildiğini gösteren altı hesap durumu. |
 | [Kesit karşılaştırma paftası](web/gorseller/kesit-paftasi.png) | Yedi bileşim, üç görünüm ve üç göreli büyütme. |
 | [Bağımsız kabul kontrolleri](docs/INDEPENDENT_ACCEPTANCE.md) | Korunum, değişmez ilerlemesi, geometri, ortak kesit kimlikleri ve kalan kabul sınırları. |
 | [3B inceleyici](docs/STAGE3_DELIVERY.md) · [Kesit ve animasyon](docs/STAGE3B4_DELIVERY.md) | Mimari, kontroller, yeniden üretilebilir varlıklar ve açık kapsam. |
@@ -167,6 +186,7 @@ Aşağıdaki galeri **gerçek arayüz ekranı değil**, uygulamanın ortak model
 
 - **Faz renkleri:** α, γ ve Fe₃C gibi denge fazlarını ayırır.
 - **Bileşen renkleri:** perlit, ledeburit ve ötektoid öncesi kökenleri ayırır.
+- **Tane sınırları:** çeliklerde çizilir; gerçek dağlamada eski östenit ağı görünmeyen ledeburit, birincil sementit ve dendritik dökümlerde gizlenir.
 - **Dağlanmış görünüm:** temsili Nital kontrastı; sementit parlak, ferrit açık, perlitik bölgeler koyudur.
 - **Göreli büyütme:** yeni bir mikroyapı üretmez; aynı kesitte farklı yakınlıkta inceleme sağlar.
 - **Optik etkiler:** yüzey gürültüsü ve tane kontrastı kimlik haritasını değiştirmez.
@@ -223,7 +243,7 @@ Büyük görüntüyü açarak düşük, orta ve yüksek göreli büyütmede ayn�
 
 İkili referans **metastabil Fe–Fe₃C**, 400–1600 °C ve yaklaşık 1 bar koşullarındadır. Bileşen kökeni, noktaya sıcaklığı artırarak gelinse bile sıvıdan yavaş soğuma geçmişini varsayar. Perlit ve ledeburit ayrı termodinamik fazlar değil, mikroyapı bileşenleridir.
 
-Soğuma kinetiği, fiziksel tane boyutu, lamel aralığı, grafit, beynit ve martenzit tahmin edilmez. Bir kesitin alan payı, numunenin kütle veya hacim payına zorla eşitlenmez; atom hücreleri referans çizimleridir. Özgün atlasın alaşımlı kesitleri korunur; yeni ikili mikroyapı katmanı alaşımlı durumlarda kapalıdır. Sayısal korunum, bağımsız deneysel doğrulama değildir. [Kapsam ve yöntem →](docs/OG_ADDITIONS.md)
+Soğuma kinetiği, fiziksel tane boyutu, lamel aralığı, grafit, beynit ve martenzit tahmin edilmez. Tek bir kesitin alan payı çizim bütçesi etrafında değişir (ortalamada eşittir); çizim bütçesi yoğunlukla düzeltilmiş hacim payı değil, kütle payıdır; atom hücreleri referans çizimleridir. Özgün atlasın alaşımlı kesitleri korunur; yeni ikili mikroyapı katmanı alaşımlı durumlarda kapalıdır. Sayısal korunum, bağımsız deneysel doğrulama değildir. [Kapsam ve yöntem →](docs/OG_ADDITIONS.md)
 
 ## Bilgisayarında çalıştır
 

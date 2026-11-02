@@ -65,7 +65,9 @@ function normalize(slice){
  const width=slice.width|0,height=slice.height|0,total=width*height;
  if(width<1||height<1||total>4194304||slice.phaseLabels?.length!==total)throw new RangeError('Invalid section label map');
  return {width,height,total,phaseCodes:slice.phaseCodes||[],partIds:slice.partIds||[],phaseLabels:slice.phaseLabels,
-  partLabels:slice.partLabels||new Uint16Array(total),grainLabels:slice.grainLabels||new Uint32Array(total)};
+  partLabels:slice.partLabels||new Uint16Array(total),grainLabels:slice.grainLabels||new Uint32Array(total),
+  // 0 where the constituent has no etched prior-austenite boundary (ledeburite, primary plates, castings).
+  etchedBoundary:slice.etchedBoundary?.length===total?slice.etchedBoundary:null};
 }
 
 /** Return presentation pixels and identity maps. Effects only change RGB tones;
@@ -74,6 +76,7 @@ function normalize(slice){
  */
 export function renderSlicePixels(slice,options={}){
  const source=normalize(slice),{width,height,total}=source;
+ const etchable=s=>!source.etchedBoundary||source.etchedBoundary[s]!==0;
  const lang=options.lang==='en'?'en':'tr',seed=Number.isFinite(options.seed)?options.seed:(slice.seed??20261101);
  const temperature=options.temperature??slice.temperature,eutectoidTemperature=options.eutectoidTemperature??slice.eutectoidTemperature;
  const magnification=options.magnification||'medium',zoom=magnification==='high'?2.5:magnification==='low'?1:1.35;
@@ -107,7 +110,7 @@ export function renderSlicePixels(slice,options={}){
     tone+=(hash(grain,7,seed)-.5)*12+(hash(sx,sy,seed)-.5)*6;
     const nx=(x+.5-width/2)/(width/2),ny=(y+.5-height/2)/(height/2);
     tone-=Math.max(0,nx*nx+ny*ny-.2)*8;
-    const adjacent=(sx>0&&source.grainLabels[s-1]!==grain)||(sy>0&&source.grainLabels[s-width]!==grain);
+    const adjacent=etchable(s)&&((sx>0&&etchable(s-1)&&source.grainLabels[s-1]!==grain)||(sy>0&&etchable(s-width)&&source.grainLabels[s-width]!==grain));
     if(adjacent&&!lamellar)tone*=.5;
    }
    colour=[tone,tone,tone];
@@ -115,8 +118,8 @@ export function renderSlicePixels(slice,options={}){
   // Same phase does not mean same grain. Show the existing 3D grain ownership
   // on solid phase/constituent views as a thin presentation overlay. A line is
   // not a second phase or a cementite film; all identity maps remain unchanged.
-  const samePhaseGrainEdge=(sx>0&&source.grainLabels[s-1]!==grain&&source.phaseLabels[s-1]===p)
-    ||(sy>0&&source.grainLabels[s-width]!==grain&&source.phaseLabels[s-width]===p);
+  const samePhaseGrainEdge=etchable(s)&&((sx>0&&etchable(s-1)&&source.grainLabels[s-1]!==grain&&source.phaseLabels[s-1]===p)
+    ||(sy>0&&etchable(s-width)&&source.grainLabels[s-width]!==grain&&source.phaseLabels[s-width]===p));
   if(options.boundaries!==false&&mode!=='etched'&&phase&&phase!=='L'&&samePhaseGrainEdge)
     colour=colour.map(channel=>channel*.58);
   const n=i*4;pixels[n]=clamp(colour[0]);pixels[n+1]=clamp(colour[1]);pixels[n+2]=clamp(colour[2]);pixels[n+3]=255;

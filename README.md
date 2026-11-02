@@ -18,9 +18,9 @@ and look inside the same structure — from a 3D section to an atomic reference.
 [Türkçe](README.tr.md) &nbsp; · &nbsp;
 [Watch the introduction](https://guloguzhanskry.github.io/faz-atlasi/gorseller/mikroyapi-sogume-en.mp4)
 
-[![Eight source-calculated Fe–C microstructures at maximum 384-grain detail, with their cementite mass fractions](web/gorseller/readme-microstructures-en.webp)](web/gorseller/readme-microstructures-en.webp)
+[![Eight source-calculated Fe–C microstructures at maximum 384-grain detail, with their constituent mass fractions](web/gorseller/readme-microstructures-en.webp)](web/gorseller/readme-microstructures-en.webp)
 
-<sub>384 grains · 512² textures · eight source-calculated states · offline schematic renders, not UI screenshots or measured micrographs</sub>
+<sub>384 grains · constituent colours with Fe₃C shown darker inside pearlite and ledeburite · offline schematic renders of the shared model, not UI screenshots or measured micrographs</sub>
 
 </div>
 
@@ -37,6 +37,23 @@ and look inside the same structure — from a 3D section to an atomic reference.
 [Open the large 900 vs 650 °C comparison](web/gorseller/secim-mikroyapi-en.webp) · [Try the live application](https://guloguzhanskry.github.io/faz-atlasi/?lang=en)
 
 <sub>This is a schematic explanation of the calculation link, not a captured web interface or a physical transformation-time simulation. Phase fractions are calculated; grain and lamellar geometry is illustrative.</sub>
+
+## Realistic section morphology
+
+The amounts are calculated; the **placement now follows metallurgical morphology** instead of generic patches. Each constituent is placed by a score field that matches how it forms, and the source mass budget is still met exactly in the 3D volume.
+
+[![Six source-calculated sections: allotriomorphic ferrite, a secondary-cementite network, primary austenite dendrites, transformed dendrites in ledeburite, eutectic ledeburite and primary cementite plates](web/gorseller/readme-morphology-en.webp)](web/gorseller/readme-morphology-en.webp)
+
+| Structure | How it is placed |
+| :--- | :--- |
+| Proeutectoid ferrite · Fe₃C(II) | Grows from prior-austenite boundaries (allotriomorphs / continuous network) using a noise-modulated boundary distance. |
+| Pearlite | 2–5 colonies per grain, each with its own warped lamella orientation. |
+| Primary austenite | <100> dendrites: trunks and secondary arms as a smooth union of capsules; Fe₃C(II) forms on their rims when they transform. |
+| Ledeburite | Radial eutectic colonies: oriented, broken γ rods in a **continuous cementite matrix**, coarsening outward; fine lamellae inside after the eutectoid. |
+| Primary cementite | Long finite plates spanning neighbouring grains. |
+| Grain boundaries | Etched only where the constituent has them — never through ledeburite, primary plates, liquid or dendritic castings. |
+
+These choices are checked with stereology tests on 2D sections of the 3D volume: section area fractions average to the drawn mass budgets (Delesse, within ±4 %), the ledeburite cementite matrix is ≥90 % one connected region, γ rods and cementite plates are elongated, dendrite sections are non-convex, and ferrite / Fe₃C(II) lie on prior boundaries. Placement is still schematic: it does not predict kinetics, grain size or lamellar spacing.
 
 ## What will I see in the application?
 
@@ -92,6 +109,7 @@ Information buttons explain the metallurgical concepts behind the cards. The new
 - **Inspectable constituent budgets** — source-derived invariant compositions, per-constituent phase breakdowns and lever-rule calculations.
 - **A second reading layer on the diagram** — P/S/E/C composition references and selectable slow-cooling constituent regions, distinct from phase boundaries.
 - **A reusable 3D inspector** — floating dock, retained camera and selection, section planes, phase/constituent/grain colours, and an atomic reference view.
+- **Morphology-aware placement** — allotriomorphic ferrite, pearlite colonies, Fe₃C(II) networks, <100> dendrites, ledeburite rods in a continuous cementite matrix and primary cementite plates, all within the exact source budget.
 - **A shared 2D section** — the cube's own label map, relative magnification, illustrative Nital appearance, deterministic optical effects and annotated PNG export.
 - **A reproducible introduction** — a short cooling sequence generated from the same source calculation and geometry, in both interface languages.
 
@@ -107,6 +125,7 @@ The mobile diagram keeps its working area instead of shrinking the plot to an un
 | Review | Contents |
 | :--- | :--- |
 | [Same volume, three displays](web/gorseller/readme-display-modes-en.webp) | Maximum-detail phase cubes, constituent cubes and etched sections from eight computed states. |
+| [Section morphology](web/gorseller/readme-morphology-en.webp) | Six calculated states showing how each constituent is placed. |
 | [Section comparison sheet](web/gorseller/kesit-paftasi.png) | Seven compositions, three appearances and three relative magnifications. |
 | [Independent acceptance](docs/INDEPENDENT_ACCEPTANCE.md) | Conservation, invariant progress, geometry, shared-section identities and remaining acceptance limits. |
 | [3D inspector](docs/STAGE3_DELIVERY.md) · [Section and animation](docs/STAGE3B4_DELIVERY.md) | Architecture, controls, reproducible assets and explicitly stated scope. |
@@ -167,6 +186,7 @@ The gallery below contains **offline renders from the application's shared model
 
 - **Phase colours:** distinguish equilibrium phases such as α, γ and Fe₃C.
 - **Constituent colours:** distinguish pearlite, ledeburite and proeutectoid ancestry.
+- **Grain boundaries:** drawn in steels; suppressed inside ledeburite, primary cementite and dendritic castings, where real etching shows no prior-austenite network.
 - **Etched appearance:** illustrative Nital contrast, with bright cementite, light ferrite and dark pearlitic regions.
 - **Relative magnification:** examines the same section more closely without generating a different structure.
 - **Optical effects:** surface noise and grain contrast do not change the identity map.
@@ -223,7 +243,7 @@ Open the full image to compare low, medium and high relative magnification using
 
 The binary reference is **metastable Fe–Fe₃C**, 400–1600 °C, approximately 1 bar. Constituent ancestry assumes slow cooling from liquid, even when a point is reached by moving upward in temperature. Pearlite and ledeburite are microconstituents, not extra thermodynamic phases.
 
-The model does not predict cooling kinetics, physical grain size, lamellar spacing, graphite, bainite or martensite. A section's area fraction is not forced to equal bulk mass or volume fraction; atom cells are reference illustrations. Alloy isopleths remain available in the original atlas, while the new binary microstructure layer is disabled for alloy states. Numerical conservation is not independent experimental validation. [Scope and methods →](docs/OG_ADDITIONS.md)
+The model does not predict cooling kinetics, physical grain size, lamellar spacing, graphite, bainite or martensite. A single section's area fraction varies around the drawn budget (on average they agree); the drawn budget is a mass fraction, not a density-corrected volume fraction; atom cells are reference illustrations. Alloy isopleths remain available in the original atlas, while the new binary microstructure layer is disabled for alloy states. Numerical conservation is not independent experimental validation. [Scope and methods →](docs/OG_ADDITIONS.md)
 
 ## Run it locally
 

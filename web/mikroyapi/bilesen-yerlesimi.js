@@ -47,19 +47,7 @@ class ConstituentOccupancy {
     this.islandFrequency = Math.min(11, surfaceDetail / 9);
     this.labels = new Uint8Array(total);
     this.partLabels = new Uint8Array(total);
-    this.field = { interface: new Float64Array(total), dendrite: new Float64Array(total), plate: new Float64Array(total) };
-    this.lamella = new Float64Array(total);
-    this.fine = new Float64Array(total);
-    this.island = new Float64Array(total);
-    for (let z = 0; z < n; z++) for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-      const i = x + n * (y + n * z), f = this.fields([(x + 0.5) / n, (y + 0.5) / n, (z + 0.5) / n]);
-      this.field.interface[i] = f.interface;
-      this.field.dendrite[i] = f.dendrite;
-      this.field.plate[i] = f.plate;
-      this.lamella[i] = f.lamella;
-      this.fine[i] = f.fine;
-      this.island[i] = f.island;
-    }
+    void total;
   }
   volume;
   size;
@@ -70,10 +58,23 @@ class ConstituentOccupancy {
   budgets = [];
   partBudgets = [];
   arrangement = "grain-boundary";
-  field;
-  lamella;
-  fine;
-  island;
+  /** Grid fields are computed on first use: steels never need dendrite, plate or eutectic fields. */
+  seedGrid;
+  grids = /* @__PURE__ */ new Map();
+  grid(name) {
+    return this.grids.get(name) ?? (this.ensure([name]), this.grids.get(name));
+  }
+  /** Fills every missing grid in one pass so nearest-seed and colony lookups are shared. */
+  ensure(names) {
+    const todo = [...new Set(names)].filter((k) => !this.grids.has(k));
+    if (!todo.length) return;
+    const n = this.size, out = todo.map(() => new Float64Array(n ** 3));
+    for (let z = 0, i = 0; z < n; z++) for (let y = 0; y < n; y++) for (let x = 0; x < n; x++, i++) {
+      const f = this.probe([(x + 0.5) / n, (y + 0.5) / n, (z + 0.5) / n], true);
+      for (let k = 0; k < todo.length; k++) out[k][i] = f(todo[k]);
+    }
+    todo.forEach((k, j) => this.grids.set(k, out[j]));
+  }
   seedById = /* @__PURE__ */ new Map();
   plans = [];
   lamellaFrequency;
@@ -97,44 +98,249 @@ class ConstituentOccupancy {
     this.frames.set(id, out);
     return out;
   }
-  fields(p) {
-    let a = Infinity, b = Infinity, id = 0;
-    for (const s of this.volume.seeds) {
+  /** Grain length scale (mean seed spacing) in normalised volume units. */
+  get grainScale() {
+    return Math.cbrt(1 / Math.max(1, this.volume.seeds.length));
+  }
+  /** Deterministic trilinear value noise in [0,1]. */
+  noise(x, y, z, salt) {
+    const ix = Math.floor(x), iy = Math.floor(y), iz = Math.floor(z), fx = x - ix, fy = y - iy, fz = z - iz;
+    const s = (t) => t * t * (3 - 2 * t), u = s(fx), v = s(fy), w = s(fz);
+    const h = (a, b, c) => hash(ix + a, iy + b, iz + c, salt);
+    const l = (a, b, t) => a + (b - a) * t;
+    return l(l(l(h(0, 0, 0), h(1, 0, 0), u), l(h(0, 1, 0), h(1, 1, 0), u), v), l(l(h(0, 0, 1), h(1, 0, 1), u), l(h(0, 1, 1), h(1, 1, 1), u), v), w);
+  }
+  /** Fractal (3-octave) noise centred on 0, roughly in [-0.5,0.5]. */
+  fbm(p, scale, salt) {
+    let sum = 0, amp = 0.5, f = scale;
+    for (let o = 0; o < 3; o++) {
+      sum += amp * (this.noise(p[0] * f, p[1] * f, p[2] * f, salt + o * 17) - 0.5);
+      f *= 2.03;
+      amp *= 0.5;
+    }
+    return sum / 0.875;
+  }
+  unitFromHash(a, b, c) {
+    const u = hash(a, b, c, 41) * 2 - 1, phi = hash(a, b, c, 42) * Math.PI * 2, s = Math.sqrt(1 - u * u);
+    return [s * Math.cos(phi), s * Math.sin(phi), u];
+  }
+  dendriteLimit = Infinity;
+  dendrites = /* @__PURE__ */ new Map();
+  /** Capsule list of one grain's <100> dendrite: trunks along the six cube half-axes and
+   * perpendicular secondary arms; cached per grain. Layout: ax,ay,az,dx,dy,dz,len,ra,rb. */
+  dendriteOf(seed, frame) {
+    const cached = this.dendrites.get(seed.id);
+    if (cached) return cached;
+    const G = this.grainScale, r0 = G * 0.055, lambda2 = G * 0.17, o = seed.position, axes = [];
+    for (const e of frame) axes.push(e, [-e[0], -e[1], -e[2]]);
+    const caps = [], groups = [];
+    let reach = 0;
+    axes.forEach((dir, i) => {
+      const start = caps.length, L1 = G * (0.62 + 0.3 * hash(seed.id, i, 61));
+      caps.push(...o, ...dir, L1, r0, r0 * 0.3);
+      reach = Math.max(reach, L1 + r0);
+      let armReach = r0;
+      const others = axes.filter((_, j) => j >> 1 !== i >> 1);
+      for (let s = lambda2 * (0.6 + 0.3 * hash(seed.id, i, 62)); s < L1 * 0.85; s += lambda2) {
+        const base = [o[0] + dir[0] * s, o[1] + dir[1] * s, o[2] + dir[2] * s], L2 = (L1 - s) * 0.7, ra = r0 * 0.55 * (1 - 0.5 * s / L1);
+        for (const d2 of others) {
+          caps.push(...base, ...d2, L2, ra, ra * 0.35);
+          reach = Math.max(reach, Math.hypot(s, L2) + ra);
+          armReach = Math.max(armReach, L2 + ra);
+        }
+      }
+      groups.push(start, caps.length, L1, armReach);
+    });
+    const out = { reach, caps: Float64Array.from(caps), groups: Float64Array.from(groups) };
+    this.dendrites.set(seed.id, out);
+    return out;
+  }
+  /** Signed distance to one grain's dendrite, smooth union of its capsules. Exact: a trunk group
+   * (or capsule) is skipped only when its lower bound exceeds the running result plus the blend
+   * width, where the smooth minimum can no longer change the value. Groups run nearest first. */
+  dendriteSdf(seed, frame, p, limit = Infinity) {
+    const { caps, groups } = this.dendriteOf(seed, frame), k = this.grainScale * 0.012;
+    const order = [];
+    for (let g = 0; g < groups.length; g += 4) {
+      const s0 = groups[g], trunkLen = groups[g + 2], armReach = groups[g + 3];
+      const tx = p[0] - caps[s0], ty = p[1] - caps[s0 + 1], tz = p[2] - caps[s0 + 2], tt = Math.max(0, Math.min(trunkLen, tx * caps[s0 + 3] + ty * caps[s0 + 4] + tz * caps[s0 + 5]));
+      order.push([Math.hypot(tx - caps[s0 + 3] * tt, ty - caps[s0 + 4] * tt, tz - caps[s0 + 5] * tt) - armReach, g]);
+    }
+    order.sort((x, y) => x[0] - y[0]);
+    let acc = Infinity;
+    for (const [lb, g] of order) {
+      if (lb > Math.min(acc, limit) + k) break;
+      for (let c = groups[g]; c < groups[g + 1]; c += 9) {
+        const px = p[0] - caps[c], py = p[1] - caps[c + 1], pz = p[2] - caps[c + 2], len = caps[c + 6], ra = caps[c + 7], rb = caps[c + 8];
+        const lbc = Math.sqrt(px * px + py * py + pz * pz) - len - ra;
+        if (lbc > Math.min(acc, limit) + k) continue;
+        const t = Math.max(0, Math.min(len, px * caps[c + 3] + py * caps[c + 4] + pz * caps[c + 5]));
+        const d = Math.hypot(px - caps[c + 3] * t, py - caps[c + 4] * t, pz - caps[c + 5] * t) - (ra + (rb - ra) * (len > 0 ? t / len : 0));
+        if (!Number.isFinite(acc)) {
+          acc = d;
+          continue;
+        }
+        const h = Math.max(k - Math.abs(acc - d), 0) / k;
+        acc = Math.min(acc, d) - h * h * k * 0.25;
+      }
+    }
+    return acc;
+  }
+  nearest(p) {
+    const g = this.seedGrid ??= (() => {
+      const n2 = Math.max(1, Math.round(Math.cbrt(this.volume.seeds.length / 2)));
+      const cells = Array.from({ length: n2 ** 3 }, () => []);
+      let maxWeight = 0;
+      for (const s of this.volume.seeds) {
+        const c = s.position.map((v) => Math.min(n2 - 1, Math.floor(v * n2)));
+        cells[c[0] + n2 * (c[1] + n2 * c[2])].push(s);
+        maxWeight = Math.max(maxWeight, s.weight);
+      }
+      return { n: n2, cells, maxWeight };
+    })();
+    const n = g.n, cx = Math.min(n - 1, Math.floor(p[0] * n)), cy = Math.min(n - 1, Math.floor(p[1] * n)), cz = Math.min(n - 1, Math.floor(p[2] * n));
+    let a = Infinity, b = Infinity, id = 0, id2 = 0;
+    const visit = (s) => {
       const dx = s.position[0] - p[0], dy = s.position[1] - p[1], dz = s.position[2] - p[2];
       const d = dx * dx + dy * dy + dz * dz - s.weight;
-      if (d < a) {
+      if (d < a || d === a && s.id < id) {
         b = a;
+        id2 = id;
         a = d;
         id = s.id;
-      } else if (d < b) b = d;
-    }
-    const seed = this.seedById.get(id), [e1, e2, e3] = this.frame(id);
-    const r = [p[0] - seed.position[0], p[1] - seed.position[1], p[2] - seed.position[2]], len = Math.hypot(...r);
-    const dot = (q) => r[0] * q[0] + r[1] * q[1] + r[2] * q[2];
-    let star = 1;
-    if (len > 0) {
-      const u1 = dot(e1) / len, u2 = dot(e2) / len, u3 = dot(e3) / len, m = u1 ** 4 + u2 ** 4 + u3 ** 4;
-      star = 1 - 0.55 * (m - 1 / 3) / (2 / 3);
-    }
-    const lam = dot(e1) * this.lamellaFrequency + hash(id, 4, 7);
-    const fineLam = dot(e2) * this.lamellaFrequency * 1.6 + hash(id, 5, 7);
-    const K = this.islandFrequency;
-    let island = Infinity;
-    const gx = Math.floor(p[0] * K), gy = Math.floor(p[1] * K), gz = Math.floor(p[2] * K);
-    for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) for (let k = -1; k <= 1; k++) {
-      const cx = gx + i, cy = gy + j, cz = gz + k;
-      const ox = (cx + hash(cx, cy, cz, 1)) / K, oy = (cy + hash(cx, cy, cz, 2)) / K, oz = (cz + hash(cx, cy, cz, 3)) / K;
-      const d = Math.hypot(p[0] - ox, p[1] - oy, p[2] - oz) * K;
-      if (d < island) island = d;
-    }
-    return {
-      interface: Number.isFinite(b) ? b - a : 0,
-      dendrite: Math.sqrt(Math.max(0, a + seed.weight)) * star,
-      plate: Math.abs(dot(e3)),
-      lamella: Math.abs(lam - Math.floor(lam) - 0.5) * 2,
-      fine: Math.abs(fineLam - Math.floor(fineLam) - 0.5) * 2,
-      island
+      } else if (d < b || d === b && s.id < id2) {
+        b = d;
+        id2 = s.id;
+      }
     };
+    for (let ring = 0; ring <= n; ring++) {
+      for (let i = cx - ring; i <= cx + ring; i++) for (let j = cy - ring; j <= cy + ring; j++) for (let k = cz - ring; k <= cz + ring; k++) {
+        if (Math.max(Math.abs(i - cx), Math.abs(j - cy), Math.abs(k - cz)) !== ring || i < 0 || j < 0 || k < 0 || i >= n || j >= n || k >= n) continue;
+        for (const s of g.cells[i + n * (j + n * k)]) visit(s);
+      }
+      const gap = Math.max(0, Math.min(p[0] - (cx - ring) / n, (cx + ring + 1) / n - p[0], p[1] - (cy - ring) / n, (cy + ring + 1) / n - p[1], p[2] - (cz - ring) / n, (cz + ring + 1) / n - p[2]));
+      if (Number.isFinite(b) && gap * gap - g.maxWeight > b) break;
+    }
+    return { a, b, id, id2 };
+  }
+  warped(p) {
+    const G = this.grainScale, amp = 0.35 / this.lamellaFrequency;
+    return [p[0] + amp * this.fbm(p, 2 / G, 101), p[1] + amp * this.fbm(p, 2 / G, 131), p[2] + amp * this.fbm(p, 2 / G, 161)];
+  }
+  fInterface(p, nr) {
+    return (Number.isFinite(nr.b) ? nr.b - nr.a : 0) * (1 + 0.7 * this.fbm(p, 3 / this.grainScale, 211));
+  }
+  fDendrite(p, nr, limit = Infinity) {
+    const d = this.dendriteSdf(this.seedById.get(nr.id), this.frame(nr.id), p, limit);
+    if (!nr.id2) return d;
+    const s2 = this.seedById.get(nr.id2), den = this.dendriteOf(s2, this.frame(nr.id2));
+    const bound = Math.hypot(p[0] - s2.position[0], p[1] - s2.position[1], p[2] - s2.position[2]) - den.reach;
+    if (bound >= Math.min(d, limit)) return d;
+    return Math.min(d, this.dendriteSdf(s2, this.frame(nr.id2), p, Math.min(d, limit)));
+  }
+  fPlate(p, nr) {
+    return Math.min(this.plateOf(nr.id, p), nr.id2 ? this.plateOf(nr.id2, p) : Infinity);
+  }
+  plateOf(id, p) {
+    const seed = this.seedById.get(id), [e1, e2, e3] = this.frame(id), G = this.grainScale;
+    const r = [p[0] - seed.position[0], p[1] - seed.position[1], p[2] - seed.position[2]], dot = (q) => r[0] * q[0] + r[1] * q[1] + r[2] * q[2];
+    const plate = (nrm, u, w, L, W, shift) => Math.abs(dot(nrm) - shift) / G + 4 * Math.max(0, Math.max(Math.abs(dot(u)) / L, Math.abs(dot(w)) / W) - 1);
+    let best = plate(e3, e1, e2, G * (1.3 + 0.5 * hash(id, 5, 92)), G * 0.5, 0);
+    if (hash(id, 5, 91) < 0.7) best = Math.min(best, plate(e1, e2, e3, G * (1.1 + 0.5 * hash(id, 5, 93)), G * 0.4, G * 0.15 * (hash(id, 5, 94) - 0.5)));
+    if (hash(id, 5, 95) < 0.35) best = Math.min(best, plate(e2, e3, e1, G * 1.1, G * 0.35, G * 0.2 * (hash(id, 5, 96) - 0.5)));
+    return best;
+  }
+  fLamella(p, nr) {
+    const id = nr.id, seed = this.seedById.get(id), G = this.grainScale;
+    const colonies = 2 + Math.floor(hash(id, 9, 9) * 4);
+    let colony = 0, best = Infinity;
+    for (let c = 0; c < colonies; c++) {
+      const off = this.unitFromHash(id, c, 71), rad = G * 0.42 * hash(id, c, 72);
+      const cx = seed.position[0] + off[0] * rad - p[0], cy = seed.position[1] + off[1] * rad - p[1], cz = seed.position[2] + off[2] * rad - p[2];
+      const d = cx * cx + cy * cy + cz * cz;
+      if (d < best) {
+        best = d;
+        colony = c;
+      }
+    }
+    const n = this.unitFromHash(id, colony, 73), q = this.warped(p);
+    const lam = (n[0] * q[0] + n[1] * q[1] + n[2] * q[2]) * this.lamellaFrequency + hash(id, colony, 74);
+    return Math.abs(lam - Math.floor(lam) - 0.5) * 2;
+  }
+  fColony(p) {
+    const Kc = Math.max(2, this.islandFrequency / 3.2);
+    let ec = [0, 0, 0], eid = [0, 0, 0], ed = Infinity;
+    const gx = Math.floor(p[0] * Kc), gy = Math.floor(p[1] * Kc), gz = Math.floor(p[2] * Kc);
+    for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) for (let k = -1; k <= 1; k++) {
+      const cx = gx + i, cy = gy + j, cz = gz + k, c = [(cx + hash(cx, cy, cz, 1)) / Kc, (cy + hash(cx, cy, cz, 2)) / Kc, (cz + hash(cx, cy, cz, 3)) / Kc];
+      const d = Math.hypot(p[0] - c[0], p[1] - c[1], p[2] - c[2]);
+      if (d < ed) {
+        ed = d;
+        ec = c;
+        eid = [cx, cy, cz];
+      }
+    }
+    return { ec, eid, Kc };
+  }
+  fIsland(p, col) {
+    const { ec, eid, Kc } = col, salt = eid[0] * 7 + eid[1] * 13 + eid[2] * 29;
+    const eFrame = this.frame(1e6 + ((eid[0] * 73856093 ^ eid[1] * 19349663 ^ eid[2] * 83492791) >>> 0) % 1e6);
+    const v = [p[0] - ec[0], p[1] - ec[1], p[2] - ec[2]], rho = Math.hypot(...v) || 1e-9, rn = rho * Kc;
+    const dv = (q) => (v[0] * q[0] + v[1] * q[1] + v[2] * q[2]) / rho;
+    const uz = dv(eFrame[2]), ux = dv(eFrame[0]), uy = dv(eFrame[1]);
+    const Nz = 10, Nphi = 20, dAng = Math.sqrt(4 * Math.PI / (Nz * Nphi));
+    const iz0 = Math.min(Nz - 1, Math.floor((uz + 1) / 2 * Nz)), phi = (Math.atan2(uy, ux) + Math.PI * 2) % (Math.PI * 2), ip0 = Math.floor(phi / (Math.PI * 2) * Nphi);
+    let spokes = Infinity;
+    for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) {
+      const iz = iz0 + di;
+      if (iz < 0 || iz >= Nz) continue;
+      const ip = ((ip0 + dj) % Nphi + Nphi) % Nphi, spoke = iz * Nphi + ip;
+      const zc = -1 + (iz + 0.15 + 0.7 * hash(salt, spoke, 81)) * 2 / Nz, pc = (ip + 0.15 + 0.7 * hash(salt, spoke, 82)) * Math.PI * 2 / Nphi, sc = Math.sqrt(1 - zc * zc);
+      const chord = Math.hypot(ux - sc * Math.cos(pc), uy - sc * Math.sin(pc), uz - zc);
+      const seg = Math.floor(Math.log(rn + 0.05) / (dAng * 2.6) + hash(salt, spoke, 83));
+      const gap = hash(salt, spoke, seg + 97) < 0.22 ? 1.5 : 0, radius = 0.75 + 0.5 * hash(salt, spoke, 84);
+      const score = chord / (dAng * radius) + gap;
+      if (score < spokes) spokes = score;
+    }
+    const Kf = Kc * 9, fx = Math.floor(p[0] * Kf), fy = Math.floor(p[1] * Kf), fz = Math.floor(p[2] * Kf);
+    let spot = Infinity;
+    if (rn < 0.4) for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) for (let k = -1; k <= 1; k++) {
+      const cx = fx + i, cy = fy + j, cz = fz + k;
+      const d = Math.hypot(p[0] - (cx + hash(cx, cy, cz, 4)) / Kf, p[1] - (cy + hash(cx, cy, cz, 5)) / Kf, p[2] - (cz + hash(cx, cy, cz, 6)) / Kf) * Kf;
+      if (d < spot) spot = d;
+    }
+    const t = Math.min(1, Math.max(0, (rn - 0.2) / 0.2)), island = rn >= 0.4 ? spokes : (1 - t) * spot * 1.6 + t * spokes;
+    return island;
+  }
+  /** Fine lamellae inside transformed-ledeburite islands; one orientation per eutectic colony. */
+  fFine(p, col) {
+    const { eid } = col, fineN = this.unitFromHash(eid[0] + 3, eid[1] + 5, eid[2] + 7), q = this.warped(p), fineLam = (fineN[0] * q[0] + fineN[1] * q[1] + fineN[2] * q[2]) * this.lamellaFrequency * 1.6 + hash(eid[0], eid[1], eid[2], 75);
+    return Math.abs(fineLam - Math.floor(fineLam) - 0.5) * 2;
+  }
+  fields(p) {
+    const nr = this.nearest(p), col = this.fColony(p);
+    return { interface: this.fInterface(p, nr), dendrite: this.fDendrite(p, nr), plate: this.fPlate(p, nr), lamella: this.fLamella(p, nr), fine: this.fFine(p, col), island: this.fIsland(p, col) };
+  }
+  /** Lazy field access for continuous sampling: only the fields a plan actually needs are computed. */
+  probe(p, exact = false) {
+    let nr, col;
+    const cache = {};
+    const near = () => nr ??= this.nearest(p);
+    const limit = exact ? Infinity : this.dendriteLimit;
+    return (name) => cache[name] ??= name === "interface" ? this.fInterface(p, near()) : name === "dendrite" ? this.fDendrite(p, near(), Number.isFinite(limit) ? limit + 1e-9 : Infinity) : name === "plate" ? this.fPlate(p, near()) : name === "lamella" ? this.fLamella(p, near()) : name === "island" ? this.fIsland(p, col ??= this.fColony(p)) : this.fFine(p, col ??= this.fColony(p));
+  }
+  /** Exact, lazily evaluated fields at one point. Safe to cache across temperature changes. */
+  lazyFields(p) {
+    const f = this.probe(p, true), out = {};
+    for (const k of ["interface", "dendrite", "plate", "lamella", "fine", "island"]) Object.defineProperty(out, k, { get: () => f(k), enumerable: true });
+    return out;
+  }
+  /** Prior-austenite grain boundaries are etched lines only where the constituent has them:
+   * never inside ledeburite (continuous cementite matrix), primary cementite plates or liquid. */
+  drawsGrainBoundary(point) {
+    const part = this.samplePart(point);
+    if (this.arrangement === "dendritic" || this.arrangement === "primary-plates") return false;
+    return !["eutectic", "plate", "last"].includes(part.placement);
   }
   fieldFor(arrangement, placement) {
     if (placement === "plate") return "plate";
@@ -175,8 +381,12 @@ class ConstituentOccupancy {
     const NONE = 255;
     this.partLabels.fill(NONE);
     const members = parts.map(() => []);
+    this.ensure(parts.flatMap((p) => {
+      const multi = Object.keys(p.phases).length > 1;
+      return [this.fieldFor(breakdown.arrangement, p.placement), ...!multi ? [] : p.placement === "eutectic" ? ["island", "fine"] : ["lamella"]];
+    }));
     parts.forEach((part, k) => {
-      const field = this.fieldFor(breakdown.arrangement, part.placement), values = this.field[field], order = this.order(field, values);
+      const field = this.fieldFor(breakdown.arrangement, part.placement), values = this.grid(field), order = this.order(field, values);
       const last = k === parts.length - 1, want = last ? Infinity : counts[k], chosen = members[k];
       for (let j = 0; j < order.length && chosen.length < want; j++) {
         const i = order[j];
@@ -200,7 +410,7 @@ class ConstituentOccupancy {
       let ordered;
       if (plan.part.placement === "eutectic") {
         const islands = Math.round((plan.part.islandShare ?? 0) * chosen.length), inIsland = new Uint8Array(total);
-        const io = this.order("island", this.island);
+        const islandGrid = this.grid("island"), io = this.order("island", islandGrid);
         let taken = 0, lastIsland = -1;
         for (let j = 0; j < io.length && taken < islands; j++) {
           const i = io[j];
@@ -210,13 +420,13 @@ class ConstituentOccupancy {
             lastIsland = i;
           }
         }
-        plan.islandCut = lastIsland < 0 ? { value: -Infinity, index: -1 } : { value: this.island[lastIsland], index: lastIsland };
-        const matrix = chosen.filter((i) => !inIsland[i]).sort((a, b) => this.island[b] - this.island[a] || a - b);
-        const fo = this.order("fine", this.fine), inside = [];
+        plan.islandCut = lastIsland < 0 ? { value: -Infinity, index: -1 } : { value: islandGrid[lastIsland], index: lastIsland };
+        const matrix = chosen.filter((i) => !inIsland[i]).sort((a, b) => islandGrid[b] - islandGrid[a] || a - b);
+        const fo = this.order("fine", this.grid("fine")), inside = [];
         for (const i of fo) if (inIsland[i] && this.partLabels[i] === k) inside.push(i);
         ordered = matrix.concat(inside);
       } else {
-        const lo = this.order("lamella", this.lamella);
+        const lo = this.order("lamella", this.grid("lamella"));
         ordered = [];
         for (const i of lo) if (this.partLabels[i] === k) ordered.push(i);
       }
@@ -227,9 +437,11 @@ class ConstituentOccupancy {
         for (; offset < end; offset++) this.labels[ordered[offset]] = phaseIndex.get(code);
         phaseCells.set(code, (phaseCells.get(code) ?? 0) + inner[j]);
         const lastCell = ordered[offset - 1];
-        plan.phaseCuts.push(j === codes.length - 1 ? END : inner[j] ? { value: this.internalScore(plan, this.island[lastCell], this.lamella[lastCell], this.fine[lastCell], lastCell), index: lastCell } : { value: -Infinity, index: -1 });
+        plan.phaseCuts.push(j === codes.length - 1 ? END : inner[j] ? { value: this.internalScore(plan, plan.part.placement === "eutectic" ? this.grid("island")[lastCell] : 0, plan.part.placement === "eutectic" ? 0 : this.grid("lamella")[lastCell], plan.part.placement === "eutectic" ? this.grid("fine")[lastCell] : 0, lastCell), index: lastCell } : { value: -Infinity, index: -1 });
       });
     });
+    const cuts = this.plans.filter((x) => x.field === "dendrite" && Number.isFinite(x.cut.value)).map((x) => x.cut.value);
+    this.dendriteLimit = cuts.length ? Math.max(...cuts) : Infinity;
     this.budgets = this.phases.map((code) => {
       const p = positive.find((x) => x.code === code), cells = phaseCells.get(code) ?? 0;
       return { code, massFraction: p.fraction, drawingFraction: cells / total, cells, belowResolution: cells === 0 };
@@ -250,12 +462,12 @@ class ConstituentOccupancy {
     if (!this.plans.length || point.length !== 3 || point.some((x2) => !finite(x2) || x2 < 0 || x2 > 1)) throw new RangeError("Invalid occupancy sample");
     const n = this.size, [x, y, z] = point.map((v) => Math.min(n - 1, Math.floor(v * n))), index = x + n * (y + n * z);
     if (this.plans.length === 1 && this.plans[0].phases.length === 1) return { part: 0, phase: this.plans[0].phases[0] };
-    const f = this.fields(point);
-    let k = this.plans.findIndex((plan2) => before(f[plan2.field], index, plan2.cut));
+    const f = this.probe(point);
+    let k = this.plans.findIndex((plan2) => before(f(plan2.field), index, plan2.cut));
     if (k < 0) k = this.plans.length - 1;
     const plan = this.plans[k];
     if (plan.phases.length === 1) return { part: k, phase: plan.phases[0] };
-    const s = this.internalScore(plan, f.island, f.lamella, f.fine, index);
+    const s = plan.part.placement === "eutectic" ? this.internalScore(plan, f("island"), 0, f("fine"), index) : this.internalScore(plan, 0, f("lamella"), 0, index);
     const j = plan.phaseCuts.findIndex((c) => before(s, index, c));
     return { part: k, phase: plan.phases[j < 0 ? plan.phases.length - 1 : j] };
   }

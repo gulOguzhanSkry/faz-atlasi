@@ -54,17 +54,18 @@ export function createModel(options={}){
    const key=`${revision}:${axis}:${depth}:${resolution}:${extent.u}:${extent.v}`;
    if(cache.has(key))return cache.get(key);
    const n=resolution,total=n*n,phaseCodes=['A','G','C','D','L'],partIds=result?.parts?.map(p=>p.id)||[];
-   const phaseLabels=new Uint8Array(total),partLabels=new Uint16Array(total),grainLabels=new Uint32Array(total);phaseLabels.fill(255);partLabels.fill(65535);
+   const phaseLabels=new Uint8Array(total),partLabels=new Uint16Array(total),grainLabels=new Uint32Array(total),etchedBoundary=new Uint8Array(total).fill(1);phaseLabels.fill(255);partLabels.fill(65535);
    const geometryKey=`${axis}:${depth}:${resolution}:${extent.u}:${extent.v}`;
    let geometry=geometryCache.get(geometryKey);
    if(active instanceof ConstituentOccupancy&&!geometry){
      geometry=[];
      for(let v=0;v<n;v++)for(let u=0;u<n;u++){
        const a=(u+.5)/n*extent.u,b=(v+.5)/n*extent.v,p=axis==='x'?[depth,a,b]:axis==='y'?[a,depth,b]:[a,b,depth];
-       geometry.push({point:p,grain:volume.sample(p),fields:active.fields(p)});
+       geometry.push({point:p,grain:volume.sample(p),fields:active.lazyFields(p)});
      }
      if(geometryCache.size>=7)geometryCache.clear();geometryCache.set(geometryKey,geometry);
    }
+   const noBoundaries=active instanceof ConstituentOccupancy&&(active.arrangement==='dendritic'||active.arrangement==='primary-plates');
    const before=(value,index,cut)=>value<cut.value||value===cut.value&&index<=cut.index;
    for(let v=0;v<n;v++)for(let u=0;u<n;u++){
      const a=(u+.5)/n*extent.u,b=(v+.5)/n*extent.v,p=axis==='x'?[depth,a,b]:axis==='y'?[a,depth,b]:[a,b,depth],i=u+n*v,s=active instanceof ConstituentOccupancy&&geometry?{grain:0,phase:'',part:''}:sample(p);
@@ -74,10 +75,12 @@ export function createModel(options={}){
        const plan=active.plans[k],score=active.internalScore(plan,fields.island,fields.lamella,fields.fine,index);
        let phaseIndex=plan.phaseCuts.findIndex(cut=>before(score,index,cut));if(phaseIndex<0)phaseIndex=plan.phases.length-1;
        s.grain=g.grain;s.phase=plan.phases[phaseIndex];s.part=plan.part.id;
+       // Prior-austenite boundaries are not etched through ledeburite, primary plates, liquid or dendritic castings.
+       etchedBoundary[i]=noBoundaries||['eutectic','plate','last'].includes(plan.part.placement)?0:1;
      }
      phaseLabels[i]=s.phase?phaseCodes.indexOf(s.phase):255;partLabels[i]=partIds.indexOf(s.part)<0?65535:partIds.indexOf(s.part);grainLabels[i]=s.grain;
    }
-   const out={width:n,height:n,axis,depth,phaseLabels,phaseCodes,partLabels,partIds,parts:result?.parts||[],grainLabels,seed,carbon,temperature,eutectoidTemperature:options.eutectoidTemperature??options.invariants?.otektoid?.T??result?.landmarks?.eutectoidT,valid,colors:{phases:PHASE_COLORS,constituents:CONSTITUENT_COLORS}};
+   const out={width:n,height:n,axis,depth,phaseLabels,phaseCodes,partLabels,partIds,parts:result?.parts||[],grainLabels,etchedBoundary,seed,carbon,temperature,eutectoidTemperature:options.eutectoidTemperature??options.invariants?.otektoid?.T??result?.landmarks?.eutectoidT,valid,colors:{phases:PHASE_COLORS,constituents:CONSTITUENT_COLORS}};
    // Six faces plus one section per frame, bounded cache.
    if(cache.size>10)cache.clear();cache.set(key,out);return out;
  }
