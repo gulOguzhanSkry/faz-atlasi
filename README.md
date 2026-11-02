@@ -1,4 +1,16 @@
-# Faz Atlası — a calculated Fe–C phase diagram for steels
+# Faz Atlası — equilibrium phases and 3D microstructures
+
+**OG fork** · [Open this fork](https://guloguzhanskry.github.io/faz-atlasi/?lang=en) · [Türkçe](README.tr.md) · [Original project by acarcemal](https://github.com/acarcemal/faz-atlasi)
+
+[![Source-calculated slow-cooling example: 3D grain volume and its section](web/gorseller/mikroyapi-sogume-en-poster.webp)](https://guloguzhanskry.github.io/faz-atlasi/?lang=en)
+
+[Watch the 12-second introduction](https://guloguzhanskry.github.io/faz-atlasi/gorseller/mikroyapi-sogume-en.mp4) · [Explore the section comparison sheet](web/gorseller/kesit-paftasi.png)
+
+Choose carbon and temperature on the diagram, inspect the phase and constituent mass budgets, then open the 3D cube. Cut the same volume in any direction, compare an illustrative etched view, or inspect an atomic reference cell. Every appearance uses an explicit scope: **schematic, unscaled, not a measured micrograph or kinetic prediction**.
+
+The original Fe–Fe₃C CALPHAD calculation, alloy-steel library and licences are retained. New features, source comparison and independent test limitations are documented in [OG additions](docs/OG_ADDITIONS.md), [3D delivery](docs/STAGE3_DELIVERY.md), [section and animation delivery](docs/STAGE3B4_DELIVERY.md), and [trace comparison](hesap/rapor/og/TRACE_COMPARISON.md).
+
+## Original project
 
 **English** · [Türkçe](README.tr.md) · [Open the app](https://acarcemal.github.io/faz-atlasi/?lang=en)
 

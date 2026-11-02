@@ -1,4 +1,16 @@
-# Faz Atlası — Fe–C ve çelikler için hesaplanmış faz diyagramı
+# Faz Atlası — denge fazları ve 3B mikroyapılar
+
+**OG fork’u** · [Bu sürümü aç](https://guloguzhanskry.github.io/faz-atlasi/?lang=tr) · [English](README.md) · [Özgün proje: acarcemal](https://github.com/acarcemal/faz-atlasi)
+
+[![Kaynak hesaplarından yavaş soğuma örneği: 3B tane hacmi ve aynı yapının kesiti](web/gorseller/mikroyapi-sogume-poster.webp)](https://guloguzhanskry.github.io/faz-atlasi/?lang=tr)
+
+[12 saniyelik tanıtımı izle](https://guloguzhanskry.github.io/faz-atlasi/gorseller/mikroyapi-sogume.mp4) · [Kesit karşılaştırma paftasını incele](web/gorseller/kesit-paftasi.png)
+
+Diyagramda karbon ve sıcaklık seç; faz ve bileşen kütle paylarını incele, ardından 3B küpü aç. Aynı hacmi farklı yönlerde kes, temsili dağlanmış görünümü karşılaştır veya atomik referans hücresine geç. Görüntüler **şematik ve ölçeksizdir; ölçülmüş mikrograf veya kinetik tahmin değildir**.
+
+Özgün Fe–Fe₃C CALPHAD hesabı, çelik kütüphanesi ve lisanslar korunmuştur. [Eklemeler ve kapsam](docs/OG_ADDITIONS.md), [3B teslimi](docs/STAGE3_DELIVERY.md), [kesit ve animasyon](docs/STAGE3B4_DELIVERY.md), [veri karşılaştırması](hesap/rapor/og/TRACE_COMPARISON.md).
+
+## Özgün proje
 
 [English](README.md) · **Türkçe** · [Uygulamayı aç](https://acarcemal.github.io/faz-atlasi/)
 
