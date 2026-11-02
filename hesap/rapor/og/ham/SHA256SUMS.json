@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "scope": "Completed numeric research trace inputs; TDB databases not redistributed",
+  "files": [
+    {
+      "file": "source-map.json",
+      "sha256": "9b3f04413fd168270388cfec0db486735afa41b2812676e3b00a4d42b4515221",
+      "bytes": 39358
+    },
+    {
+      "file": "source-map-4.json",
+      "sha256": "d6afe1e7aa506f51dbd91c6a30df3c4e446b04f05029f5f6a6426d71b4b71648",
+      "bytes": 64515
+    },
+    {
+      "file": "source-map-2.json",
+      "sha256": "59183501655d52f647087a6e864c0956dd3c43327bf1745ac393cd9d6df67906",
+      "bytes": 113346
+    },
+    {
+      "file": "source-pure.json",
+      "sha256": "8f976066a84c2977988ee3340a947d688f1f9a1a534bc18a03216f0b802788f9",
+      "bytes": 389
+    },
+    {
+      "file": "reference-map.json",
+      "sha256": "5bc2de50b95a428023ad34d03b3257bb49081999eaa2d231d67a9bcb0286f3e5",
+      "bytes": 39402
+    },
+    {
+      "file": "reference-pure.json",
+      "sha256": "33a5a79df95e5bd341425314a2b76b22b76f86a1eb34d5df63b5186259d4c562",
+      "bytes": 389
+    },
+    {
+      "file": "solver-input.json",
+      "sha256": "bb305eed3884948dab1fa05a59561e588635d1cc55ea55cca66b755bacd0d1b3",
+      "bytes": 11363
+    }
+  ]
+}

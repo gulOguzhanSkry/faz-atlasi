@@ -1,0 +1,26 @@
+[
+  {
+    "temperature": 911.6640143031882,
+    "phases": [
+      "BCC_A2",
+      "FCC_A1"
+    ],
+    "error": 1e-07
+  },
+  {
+    "temperature": 1394.3189219616356,
+    "phases": [
+      "FCC_A1",
+      "BCC_A2"
+    ],
+    "error": 1e-07
+  },
+  {
+    "temperature": 1537.8047731488775,
+    "phases": [
+      "BCC_A2",
+      "LIQUID"
+    ],
+    "error": 1e-07
+  }
+]

@@ -1,0 +1,5 @@
+# Optional research environment; not needed by the deployed web application.
+# Recorded versions of the environment used for the archived mapping traces.
+pycalphad==0.11.2
+numpy==2.5.4
+scipy==1.18.1
