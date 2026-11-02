@@ -13,8 +13,54 @@ export const CONSTITUENT_COLORS:Record<ConstituentId,string>={
 export interface ConstituentBudget {id:ConstituentId;label:string;massFraction:number;drawingFraction:number;cells:number;belowResolution:boolean}
 interface Cut {value:number;index:number}
 interface PartPlan {part:ConstituentPart;cut:Cut;field:FieldName;phases:PhaseCode[];phaseCuts:Cut[];islandCut?:Cut}
-type FieldName='interface'|'dendrite'|'plate';
-interface Fields {interface:number;dendrite:number;plate:number;lamella:number;fine:number;island:number}
+type FieldName='interface'|'ferrite'|'dendrite'|'plate';
+export interface Fields {interface:number;ferrite:number;dendrite:number;plate:number;lamella:number;fine:number;island:number}
+/**
+ * Representative physical scale of the drawing (assumed, not calculated): prior-austenite
+ * grain size, coarse (fully annealed) pearlite spacing and proeutectoid-ferrite grain size.
+ * They fix the lamella frequency and the ferrite-grain spacing in volume units and let a
+ * renderer decide from the pixel size whether lamellae are resolved.
+ */
+export const MICRO_SCALE=Object.freeze({priorGrainUm:40,lamellaSpacingUm:.5,ferriteGrainUm:12,ledeburitePearliteFactor:1.6});
+export type SectionAxis='x'|'y'|'z';
+/** Section appearance of a lamellar constituent inside one pixel footprint. */
+export interface LamellarAppearance {
+ /** Area fraction of cementite inside the pixel (box-filtered lamella pattern). */
+ coverage:number;
+ /** Mean cementite fraction of this constituent (value an unresolved pixel tends to). */
+ thetaShare:number;
+ /** Lamella periods per pixel along the in-plane gradient: > ~0.5 means unresolved. */
+ periodsPerPixel:number;
+ /** Apparent / true spacing = 1/|sin θ| for the colony cut by this section. */
+ apparentRatio:number;
+ /** Stable id of the colony (or eutectic colony) for per-colony tone. */
+ colony:number;
+ /** Direction of the lamella normal in the section, atan2(n·v, n·u) (radians). */
+ angle:number;
+}
+/** Exact mean of the periodic cementite indicator (frac(x) within ½±c/2) over [x0, x1]. */
+export function lamellaCoverage(x0:number,x1:number,c:number):number{
+ if(!(c>0))return 0;if(c>=1)return 1;
+ const F=(x:number)=>{const i=Math.floor(x),f=x-i;return i*c+Math.min(c,Math.max(0,f-(.5-c/2)));};
+ if(Math.abs(x1-x0)<1e-9){const f=x0-Math.floor(x0);return f>.5-c/2&&f<.5+c/2?1:0;}
+ return (F(Math.max(x0,x1))-F(Math.min(x0,x1)))/Math.abs(x1-x0);
+}
+/** Single-phase α on prior boundaries: proeutectoid ferrite (allotriomorphs and idiomorphs). */
+export const isFerriteBand=(part:ConstituentPart)=>part.placement==='boundary'&&Object.keys(part.phases).length===1&&(part.phases.A??0)>0;
+type LamellaCoord={lam:number;n:Vec3;colony:number};
+type Probe=((name:keyof Fields)=>number)&{coord(kind:'lamella'|'fine'):LamellaCoord};
+/**
+ * Lazily evaluated fields at one point. Getters live on the prototype, so a cached section of
+ * 512² pixels holds one small object per pixel instead of seven closures.
+ */
+class LazyFieldView implements Fields{
+ constructor(readonly probe:Probe){}
+ get interface(){return this.probe('interface');}get ferrite(){return this.probe('ferrite');}get dendrite(){return this.probe('dendrite');}
+ get plate(){return this.probe('plate');}get lamella(){return this.probe('lamella');}get fine(){return this.probe('fine');}get island(){return this.probe('island');}
+}
+/** Distance from the centre of the θ band, 0 at the band centre and 1 midway between bands. */
+const bandScore=(lam:number)=>Math.abs((lam-Math.floor(lam))-.5)*2;
+const gaussian=(u:number,v:number)=>Math.sqrt(-2*Math.log(Math.max(1e-12,u)))*Math.cos(2*Math.PI*v);
 
 const finite=(n:number)=>Number.isFinite(n);
 const before=(value:number,index:number,cut:Cut)=>value<cut.value||value===cut.value&&index<=cut.index;
@@ -52,6 +98,8 @@ export class ConstituentOccupancy {
  private grid(name:keyof Fields):Float64Array{return this.grids.get(name)??(this.ensure([name]),this.grids.get(name)!);}
  /** Fills every missing grid in one pass so nearest-seed and colony lookups are shared. */
  private ensure(names:(keyof Fields)[]):void{
+  // The ferrite field needs the interface quantile (idiomorph onset) first.
+  if(names.includes('ferrite')&&!this.grids.has('interface'))this.ensure(['interface']);
   const todo=[...new Set(names)].filter(k=>!this.grids.has(k));if(!todo.length)return;
   const n=this.size,out=todo.map(()=>new Float64Array(n**3));
   for(let z=0,i=0;z<n;z++)for(let y=0;y<n;y++)for(let x=0;x<n;x++,i++){const f=this.probe([(x+.5)/n,(y+.5)/n,(z+.5)/n],true);for(let k=0;k<todo.length;k++)out[k][i]=f(todo[k]);}
@@ -65,8 +113,10 @@ export class ConstituentOccupancy {
   if(!finite(surfaceDetail)||surfaceDetail<16)throw new RangeError('Invalid surface detail');
   this.size=size;const n=size,total=n**3;
   for(const s of volume.seeds)this.seedById.set(s.id,s);
-  // Keep at least ~5 surface samples per lamella period to avoid moiré.
-  this.lamellaFrequency=Math.min(22,surfaceDetail/5);this.islandFrequency=Math.min(11,surfaceDetail/9);
+  // Physical lamella frequency (periods per volume unit). It is far above the voxel and
+  // texture resolution on purpose: identity stays exact, and renderers box-filter the pattern
+  // (lamellarAppearance) instead of drawing aliased stripes.
+  this.lamellaFrequency=this.unitUm/MICRO_SCALE.lamellaSpacingUm;this.islandFrequency=Math.min(11,surfaceDetail/9);
   this.labels=new Uint8Array(total);this.partLabels=new Uint8Array(total);
   void total;
  }
@@ -86,6 +136,8 @@ export class ConstituentOccupancy {
  }
  /** Grain length scale (mean seed spacing) in normalised volume units. */
  private get grainScale():number{return Math.cbrt(1/Math.max(1,this.volume.seeds.length));}
+ /** Micrometres per volume unit implied by MICRO_SCALE.priorGrainUm. */
+ get unitUm():number{return MICRO_SCALE.priorGrainUm/this.grainScale;}
  /** Deterministic trilinear value noise in [0,1]. */
  private noise(x:number,y:number,z:number,salt:number):number{
   const ix=Math.floor(x),iy=Math.floor(y),iz=Math.floor(z),fx=x-ix,fy=y-iy,fz=z-iz;
@@ -164,12 +216,55 @@ export class ConstituentOccupancy {
  }
  private warped(p:Vec3):Vec3{
   // Gently warped coordinates: lamellae are not ruler-straight in real sections.
-  const G=this.grainScale,amp=.35/this.lamellaFrequency;
+  // Amplitude in volume units (≈ 2 % of a grain), independent of the lamella frequency.
+  const G=this.grainScale,amp=.02*G;
   return [p[0]+amp*this.fbm(p,2/G,101),p[1]+amp*this.fbm(p,2/G,131),p[2]+amp*this.fbm(p,2/G,161)];
  }
- private fInterface(p:Vec3,nr:{a:number;b:number}):number{
-  // Prior-grain boundary distance with irregular thickness (allotriomorphs, films).
-  return (Number.isFinite(nr.b)?nr.b-nr.a:0)*(1+.7*this.fbm(p,3/this.grainScale,211));
+ /** Log-normal thickness factor of the boundary facet between two prior grains (σ = 0.45). */
+ private facetFactor(id:number,id2:number):number{
+  if(!id2)return 1;const a=Math.min(id,id2),b=Math.max(id,id2);
+  return Math.exp(.45*gaussian(hash(a,b,301),hash(a,b,302)));
+ }
+ private fInterface(p:Vec3,nr:{a:number;b:number;id:number;id2:number}):number{
+  // Prior-grain boundary distance. Each facet has its own thickness factor; noise varies it
+  // along the facet; the additive term breaks thin films (low θII) into beads, while thick
+  // bands (ferrite) are barely affected because their scores are much larger.
+  const G=this.grainScale,d=Number.isFinite(nr.b)?nr.b-nr.a:0;
+  return d/this.facetFactor(nr.id,nr.id2)*(1+.35*this.fbm(p,3/G,211))+.03*G*G*Math.max(0,this.fbm(p,4/G,223));
+ }
+ /** Idiomorph nuclei (inclusions) inside grains: one jittered site per cell of size 0.85 G, 55 % occupied. */
+ private idiomorphDistance(p:Vec3):number{
+  const h=.85*this.grainScale,gx=Math.floor(p[0]/h),gy=Math.floor(p[1]/h),gz=Math.floor(p[2]/h);let best=Infinity;
+  for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++)for(let k=-1;k<=1;k++){
+   const cx=gx+i,cy=gy+j,cz=gz+k;if(hash(cx,cy,cz,331)>.55)continue;
+   const d=Math.hypot(p[0]-(cx+.15+.7*hash(cx,cy,cz,332))*h,p[1]-(cy+.15+.7*hash(cx,cy,cz,333))*h,p[2]-(cz+.15+.7*hash(cx,cy,cz,334))*h);if(d<best)best=d;
+  }
+  return best;
+ }
+ private idioS0?:number;
+ /** Interface score at the 35 % quantile: idiomorphs only nucleate once the boundary band is that thick. */
+ private get idiomorphOnset():number{
+  if(this.idioS0!==undefined)return this.idioS0;
+  const g=this.grid('interface'),o=this.order('interface',g);return this.idioS0=g[o[Math.floor(.35*(o.length-1))]];
+ }
+ private fFerrite(p:Vec3,nr:{a:number;b:number;id:number;id2:number}):number{
+  // Proeutectoid ferrite: allotriomorphs on prior boundaries plus intragranular idiomorphs
+  // that appear only for large ferrite fractions (their score starts at the 35 % quantile).
+  const r=.09*this.grainScale,d=this.idiomorphDistance(p);
+  return Math.min(this.fInterface(p,nr),this.idiomorphOnset*(1+(d/r)**2));
+ }
+ /**
+  * Proeutectoid-ferrite grain identity: nearest jittered nucleus on a lattice with the
+  * physical ferrite grain size. Display only: ferrite–ferrite boundaries replace the prior
+  * austenite boundary, which is not visible inside ferrite.
+  */
+ ferriteGrain(p:Vec3):number{
+  const h=MICRO_SCALE.ferriteGrainUm/this.unitUm,gx=Math.floor(p[0]/h),gy=Math.floor(p[1]/h),gz=Math.floor(p[2]/h);let best=Infinity,id=0;
+  for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++)for(let k=-1;k<=1;k++){
+   const cx=gx+i,cy=gy+j,cz=gz+k,d=(p[0]-(cx+hash(cx,cy,cz,341))*h)**2+(p[1]-(cy+hash(cx,cy,cz,342))*h)**2+(p[2]-(cz+hash(cx,cy,cz,343))*h)**2;
+   if(d<best){best=d;id=1+((cx+512)&1023)+1024*(((cy+512)&1023)+1024*((cz+512)&1023));}
+  }
+  return id;
  }
  private fDendrite(p:Vec3,nr:{id:number;id2:number},limit=Infinity):number{
   // Exact union over the two nearest grains so arms are not cut by the Voronoi facet; the
@@ -196,13 +291,16 @@ export class ConstituentOccupancy {
   return best;
  }
  private fLamella(p:Vec3,nr:{id:number}):number{
-  // Pearlite colonies: 2-5 sub-colonies per prior austenite grain, each with its own lamella normal.
-  const id=nr.id,seed=this.seedById.get(id)!,G=this.grainScale;
+  const {lam}=this.lamellaCoord(p,nr.id);return Math.abs((lam-Math.floor(lam))-.5)*2;
+ }
+ /** Pearlite colonies: 2-5 per prior austenite grain, each with its own lamella normal. */
+ private lamellaCoord(p:Vec3,id:number):{lam:number;n:Vec3;colony:number}{
+  const seed=this.seedById.get(id)!,G=this.grainScale;
   const colonies=2+Math.floor(hash(id,9,9)*4);let colony=0,best=Infinity;
   for(let c=0;c<colonies;c++){const off=this.unitFromHash(id,c,71),rad=G*.42*hash(id,c,72);const cx=seed.position[0]+off[0]*rad-p[0],cy=seed.position[1]+off[1]*rad-p[1],cz=seed.position[2]+off[2]*rad-p[2];const d=cx*cx+cy*cy+cz*cz;if(d<best){best=d;colony=c;}}
   const n=this.unitFromHash(id,colony,73),q=this.warped(p);
   const lam=(n[0]*q[0]+n[1]*q[1]+n[2]*q[2])*this.lamellaFrequency+hash(id,colony,74);
-  return Math.abs((lam-Math.floor(lam))-.5)*2;
+  return {lam,n,colony:id*8+colony};
  }
  private fColony(p:Vec3){
   // Ledeburite: eutectic colonies grow radially; gamma rods are broken spokes whose spacing
@@ -242,27 +340,31 @@ export class ConstituentOccupancy {
  }
  /** Fine lamellae inside transformed-ledeburite islands; one orientation per eutectic colony. */
  private fFine(p:Vec3,col:{eid:number[]}):number{
-  const {eid}=col,fineN=this.unitFromHash(eid[0]+3,eid[1]+5,eid[2]+7),q=this.warped(p),fineLam=(fineN[0]*q[0]+fineN[1]*q[1]+fineN[2]*q[2])*this.lamellaFrequency*1.6+hash(eid[0],eid[1],eid[2],75);
-  return Math.abs((fineLam-Math.floor(fineLam))-.5)*2;
+  const {lam}=this.fineCoord(p,col);return Math.abs((lam-Math.floor(lam))-.5)*2;
+ }
+ private fineCoord(p:Vec3,col:{eid:number[]}):{lam:number;n:Vec3;colony:number}{
+  const {eid}=col,n=this.unitFromHash(eid[0]+3,eid[1]+5,eid[2]+7),q=this.warped(p);
+  const lam=(n[0]*q[0]+n[1]*q[1]+n[2]*q[2])*this.lamellaFrequency*MICRO_SCALE.ledeburitePearliteFactor+hash(eid[0],eid[1],eid[2],75);
+  return {lam,n,colony:1e6+(((eid[0]&1023)<<20)|((eid[1]&1023)<<10)|(eid[2]&1023))};
  }
  private fields(p:Vec3):Fields{
   const nr=this.nearest(p),col=this.fColony(p);
-  return {interface:this.fInterface(p,nr),dendrite:this.fDendrite(p,nr),plate:this.fPlate(p,nr),lamella:this.fLamella(p,nr),fine:this.fFine(p,col),island:this.fIsland(p,col)};
+  return {interface:this.fInterface(p,nr),ferrite:this.fFerrite(p,nr),dendrite:this.fDendrite(p,nr),plate:this.fPlate(p,nr),lamella:this.fLamella(p,nr),fine:this.fFine(p,col),island:this.fIsland(p,col)};
  }
  /** Lazy field access for continuous sampling: only the fields a plan actually needs are computed. */
- private probe(p:Vec3,exact=false):(name:keyof Fields)=>number{
-  let nr:ReturnType<ConstituentOccupancy['nearest']>|undefined,col:ReturnType<ConstituentOccupancy['fColony']>|undefined;const cache:Partial<Fields>={};
+ private probe(p:Vec3,exact=false):Probe{
+  let nr:ReturnType<ConstituentOccupancy['nearest']>|undefined,col:ReturnType<ConstituentOccupancy['fColony']>|undefined,lc:LamellaCoord|undefined,fc:LamellaCoord|undefined;const cache:Partial<Fields>={};
   const near=()=>nr??=this.nearest(p);
   // Continuous sampling only compares against plan cuts: the dendrite distance may stop early once
   // it is provably beyond the largest finite cut (the classification is then unchanged).
   const limit=exact?Infinity:this.dendriteLimit;
-  return name=>cache[name]??=(name==='interface'?this.fInterface(p,near()):name==='dendrite'?this.fDendrite(p,near(),Number.isFinite(limit)?limit+1e-9:Infinity):name==='plate'?this.fPlate(p,near()):name==='lamella'?this.fLamella(p,near()):name==='island'?this.fIsland(p,col??=this.fColony(p)):this.fFine(p,col??=this.fColony(p)));
+  const f=(name:keyof Fields)=>cache[name]??=(name==='interface'?this.fInterface(p,near()):name==='ferrite'?this.fFerrite(p,near()):name==='dendrite'?this.fDendrite(p,near(),Number.isFinite(limit)?limit+1e-9:Infinity):name==='plate'?this.fPlate(p,near()):name==='lamella'?bandScore((lc??=this.lamellaCoord(p,near().id)).lam):name==='island'?this.fIsland(p,col??=this.fColony(p)):bandScore((fc??=this.fineCoord(p,col??=this.fColony(p))).lam));
+  return Object.assign(f,{coord:(kind:'lamella'|'fine')=>kind==='lamella'?lc??=this.lamellaCoord(p,near().id):fc??=this.fineCoord(p,col??=this.fColony(p))});
  }
+
  /** Exact, lazily evaluated fields at one point. Safe to cache across temperature changes. */
  lazyFields(p:Vec3):Fields{
-  const f=this.probe(p,true),out={} as Fields;
-  for(const k of ['interface','dendrite','plate','lamella','fine','island'] as const)Object.defineProperty(out,k,{get:()=>f(k),enumerable:true});
-  return out;
+  return new LazyFieldView(this.probe(p,true));
  }
  /** Prior-austenite grain boundaries are etched lines only where the constituent has them:
   * never inside ledeburite (continuous cementite matrix), primary cementite plates or liquid. */
@@ -270,10 +372,40 @@ export class ConstituentOccupancy {
   const part=this.samplePart(point);
   // Dendritic structures: prior-grain facets are a construction aid, not etched boundaries.
   if(this.arrangement==='dendritic'||this.arrangement==='primary-plates')return false;
+  // Proeutectoid ferrite consumes the prior austenite boundary: inside it only ferrite–ferrite
+  // boundaries exist (see ferriteGrain), never the old γ boundary.
+  if(isFerriteBand(part))return false;
   return !['eutectic','plate','last'].includes(part.placement);
  }
- private fieldFor(arrangement:Arrangement,placement:Placement):FieldName{
+ /**
+  * Section appearance of a lamellar constituent at a point: cementite area fraction inside a
+  * square pixel of side `pixel` (volume units) spanned by in-plane unit vectors u, v. Returns
+  * null where the point is not inside a resolvable lamellar constituent (pearlite, or the
+  * pearlite islands of transformed ledeburite). Identity (sample) is unchanged by this.
+  * `at` lets a caller that already classified the point (part index, cached fields) skip
+  * the second classification.
+  */
+ lamellarAppearance(point:Vec3,u:Vec3,v:Vec3,pixel:number,at?:{part:number;fields?:Fields}):LamellarAppearance|null{
+  if(!(pixel>0))throw new RangeError('Invalid pixel size');
+  const k=at?at.part:this.locate(point).part,plan=this.plans[k];if(!plan)return null;
+  if(plan.phases.length<2||plan.phases[0]!=='C')return null;
+  const c=plan.phaseCuts[0].value;let coord:{lam:number;n:Vec3;colony:number};
+  if(plan.part.placement==='eutectic'){
+   if(!plan.islandCut||!(c>0))return null;
+   const n=this.size,[x,y,z]=point.map(t=>Math.min(n-1,Math.floor(t*n))),index=x+n*(y+n*z);
+   if(!before(at?.fields?at.fields.island:this.probe(point)('island'),index,plan.islandCut))return null;
+   coord=(at?.fields instanceof LazyFieldView?at.fields.probe:this.probe(point,true)).coord('fine');
+  }else coord=(at?.fields instanceof LazyFieldView?at.fields.probe:this.probe(point,true)).coord('lamella');
+  const share=Math.min(1,Math.max(0,c)),freq=this.lamellaFrequency*(plan.part.placement==='eutectic'?MICRO_SCALE.ledeburitePearliteFactor:1);
+  const nu=coord.n[0]*u[0]+coord.n[1]*u[1]+coord.n[2]*u[2],nv=coord.n[0]*v[0]+coord.n[1]*v[1]+coord.n[2]*v[2];
+  const inPlane=Math.max(1e-6,Math.hypot(nu,nv)),span=freq*pixel*(Math.abs(nu)+Math.abs(nv));
+  const lam=coord.lam;
+  return {coverage:lamellaCoverage(lam-span/2,lam+span/2,share),thetaShare:share,periodsPerPixel:freq*pixel*inPlane,apparentRatio:1/inPlane,colony:coord.colony,angle:Math.atan2(nv,nu)};
+ }
+ private fieldFor(arrangement:Arrangement,part:ConstituentPart):FieldName{
+  const placement=part.placement;
   if(placement==='plate')return 'plate';
+  if(arrangement==='grain-boundary'&&isFerriteBand(part))return 'ferrite';
   return arrangement==='dendritic'||arrangement==='primary-plates'?'dendrite':'interface';
  }
 
@@ -299,9 +431,9 @@ export class ConstituentOccupancy {
   this.plans=[];this.parts=parts;this.arrangement=breakdown.arrangement;
   const NONE=255;this.partLabels.fill(NONE);
   const members:number[][]=parts.map(()=>[]);
-  this.ensure(parts.flatMap(p=>{const multi=Object.keys(p.phases).length>1;return [this.fieldFor(breakdown.arrangement,p.placement),...(!multi?[]:p.placement==='eutectic'?['island','fine'] as const:['lamella'] as const)];}));
+  this.ensure(parts.flatMap(p=>{const multi=Object.keys(p.phases).length>1;return [this.fieldFor(breakdown.arrangement,p),...(!multi?[]:p.placement==='eutectic'?['island','fine'] as const:['lamella'] as const)];}));
   parts.forEach((part,k)=>{
-   const field=this.fieldFor(breakdown.arrangement,part.placement),values=this.grid(field),order=this.order(field,values);
+   const field=this.fieldFor(breakdown.arrangement,part),values=this.grid(field),order=this.order(field,values);
    const last=k===parts.length-1,want=last?Infinity:counts[k],chosen=members[k];
    for(let j=0;j<order.length&&chosen.length<want;j++){const i=order[j];if(this.partLabels[i]===NONE){this.partLabels[i]=k;chosen.push(i);}}
    const cut:Cut=last?END:chosen.length?{value:values[chosen.at(-1)!],index:chosen.at(-1)!}:{value:-Infinity,index:-1};

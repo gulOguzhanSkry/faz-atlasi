@@ -17,8 +17,8 @@ export const SLICE_STRINGS={
   'kesit.hot':'Sıcak hal / kalan östenit: oda sıcaklığında Nital görünümü uygulanmaz. Faz renkleri gösteriliyor.',
   'kesit.unavailable':'Kesit için çözümlenmiş ikili Fe–Fe₃C durumu seçin.',
   'kesit.assumption':'Yavaş denge soğuması varsayımı',
-  'kesit.disclaimer':'Şematik · ölçeksiz · ölçülmüş mikrograf değildir',
-  'kesit.scale':'Büyütme göreli; tane boyutu ve lamel aralığı fiziksel ölçekte değildir.',
+  'kesit.disclaimer':'Şematik · temsili ölçek · ölçülmüş mikrograf değildir',
+  'kesit.scale':'Temsili ölçek varsayımı: önceki östenit tanesi ≈40 µm, ferrit tanesi ≈12 µm, perlit lamel aralığı ≈0,5 µm. Çözünürlük altındaki lamel bölgeleri faz renklerinde şematik çizgiyle gösterilir.',
   'kesit.area':'Kesit alan payı, tüm numunenin kütle veya hacim payı değildir.',
   'kesit.effects':'Yüzey dokusu ve optik etkiler',
   'kesit.download':'Bilgi şeritli PNG kaydet',
@@ -36,8 +36,8 @@ export const SLICE_STRINGS={
   'kesit.hot':'Hot state / residual austenite: room-temperature Nital appearance is not applied. Showing phase colours.',
   'kesit.unavailable':'Select a resolved binary Fe–Fe₃C state to view its section.',
   'kesit.assumption':'Assumed slow equilibrium cooling',
-  'kesit.disclaimer':'Schematic · unscaled · not a measured micrograph',
-  'kesit.scale':'Magnification is relative; grain size and lamellar spacing are not physically calibrated.',
+  'kesit.disclaimer':'Schematic · representative scale · not a measured micrograph',
+  'kesit.scale':'Assumed representative scale: prior-austenite grain ≈40 µm, ferrite grain ≈12 µm, pearlite lamellar spacing ≈0.5 µm. Lamellae below the pixel resolution are drawn as schematic stripes in phase colours.',
   'kesit.area':'Section area fraction is not the whole sample mass or volume fraction.',
   'kesit.effects':'Surface texture and optical effects',
   'kesit.download':'Save PNG with information strip',
@@ -67,8 +67,42 @@ function normalize(slice){
  return {width,height,total,phaseCodes:slice.phaseCodes||[],partIds:slice.partIds||[],phaseLabels:slice.phaseLabels,
   partLabels:slice.partLabels||new Uint16Array(total),grainLabels:slice.grainLabels||new Uint32Array(total),
   // 0 where the constituent has no etched prior-austenite boundary (ledeburite, primary plates, castings).
-  etchedBoundary:slice.etchedBoundary?.length===total?slice.etchedBoundary:null};
+  etchedBoundary:slice.etchedBoundary?.length===total?slice.etchedBoundary:null,
+  // Optional appearance layer (model ≥ realism 2). Absent arrays keep the legacy look.
+  boundaryLabels:slice.boundaryLabels?.length===total?slice.boundaryLabels:null,
+  coverage:slice.coverage?.length===total?slice.coverage:null,
+  periods:slice.periodsPerPixel?.length===total?slice.periodsPerPixel:null,
+  apparent:slice.apparentRatio?.length===total?slice.apparentRatio:null,
+  share:slice.thetaShare?.length===total?slice.thetaShare:null,
+  angle:slice.lamellaAngle?.length===total?slice.lamellaAngle:null,
+  presampled:Number(slice.zoom)>1};
 }
+const lerp=(a,b,t)=>a+(b-a)*t,unit=v=>Math.max(0,Math.min(1,v));
+/** Etched (optical, Nital) tone of a lamellar pixel. Resolved: light ferrite with dark
+ * cementite lamellae (relief and edge shadow). As lamella periods per pixel rise past the
+ * resolution limit the pixel blends into the dark unresolved pearlite tone; colonies cut at
+ * a shallow angle (large apparent spacing) stay slightly lighter. */
+export function lamellarTone(coverage,periodsPerPixel,apparentRatio){
+ const resolved=205-coverage*150,unresolved=70+25*unit((apparentRatio-1)/3);
+ return lerp(resolved,unresolved,unit((periodsPerPixel-.35)/.65));
+}
+/** Mean of the periodic θ indicator (band of width c centred on frac = ½) over [x0, x1]. */
+export function lamellaCoverage(x0,x1,c){
+ if(!(c>0))return 0;if(c>=1)return 1;
+ const F=x=>{const i=Math.floor(x),f=x-i;return i*c+Math.min(c,Math.max(0,f-(.5-c/2)));};
+ if(Math.abs(x1-x0)<1e-9){const f=x0-Math.floor(x0);return f>.5-c/2&&f<.5+c/2?1:0;}
+ return (F(Math.max(x0,x1))-F(Math.min(x0,x1)))/Math.abs(x1-x0);
+}
+/** Phase-colour view of a lamellar pixel. Resolved: true θ area fraction. Unresolved: the
+ * same θ share drawn as schematic stripes of DISPLAY_PERIOD pixels along the colony's real
+ * lamella direction, so pearlite still reads as α + θ (area fractions are preserved). */
+export const DISPLAY_PERIOD=6;
+export function lamellarPhaseWeight(x,y,coverage,share,periodsPerPixel,angle){
+ const blur=unit((periodsPerPixel-.35)/.65);if(!blur||!Number.isFinite(angle)||!Number.isFinite(share))return coverage;
+ const c=Math.cos(angle),s=Math.sin(angle),t=((x+.5)*c+(y+.5)*s)/DISPLAY_PERIOD,span=(Math.abs(c)+Math.abs(s))/DISPLAY_PERIOD;
+ return lerp(coverage,lamellaCoverage(t-span/2,t+span/2,share),blur);
+}
+export const MAGNIFICATION_ZOOM=Object.freeze({low:1,medium:1.35,high:2.5});
 
 /** Return presentation pixels and identity maps. Effects only change RGB tones;
  * phase/part/grain identities are never reallocated to improve an image.
@@ -79,7 +113,8 @@ export function renderSlicePixels(slice,options={}){
  const etchable=s=>!source.etchedBoundary||source.etchedBoundary[s]!==0;
  const lang=options.lang==='en'?'en':'tr',seed=Number.isFinite(options.seed)?options.seed:(slice.seed??20261101);
  const temperature=options.temperature??slice.temperature,eutectoidTemperature=options.eutectoidTemperature??slice.eutectoidTemperature;
- const magnification=options.magnification||'medium',zoom=magnification==='high'?2.5:magnification==='low'?1:1.35;
+ const magnification=options.magnification||'medium',zoom=source.presampled?1:MAGNIFICATION_ZOOM[magnification]??1.35;
+ const edgeLabels=source.boundaryLabels||source.grainLabels,look=s=>source.coverage&&Number.isFinite(source.coverage[s]);
  let mode=options.mode||'phases',warning='';
  const hasGamma=source.phaseCodes.includes('G')&&source.phaseLabels.some(v=>source.phaseCodes[v]==='G');
  if(mode==='etched'&&(temperature>eutectoidTemperature+1e-7||hasGamma)){
@@ -95,11 +130,16 @@ export function renderSlicePixels(slice,options={}){
   let colour;
   if(mode==='grains')colour=grainColour(grain);
   else if(mode==='constituents')colour=partRGB[id]||phaseRGB[phase]||[142,142,142];
+  else if(mode!=='etched'&&look(s)&&phaseRGB.A&&phaseRGB.C){
+   const w=lamellarPhaseWeight(x,y,source.coverage[s],source.share?.[s],source.periods?.[s]??0,source.angle?.[s]);
+   colour=phaseRGB.A.map((a,k)=>lerp(a,phaseRGB.C[k],w));
+  }
   else if(mode!=='etched')colour=phaseRGB[phase]||[142,142,142];
   else{
    let tone;
    const lamellar=id==='pearlite'||id==='transformed-ledeburite';
-   if(id==='pearlite')tone=magnification==='low'?77:phase==='C'?(magnification==='high'?231:188):(magnification==='high'?128:101);
+   if(look(s))tone=lamellarTone(source.coverage[s],source.periods?.[s]??0,source.apparent?.[s]??1);
+   else if(id==='pearlite')tone=magnification==='low'?77:phase==='C'?(magnification==='high'?231:188):(magnification==='high'?128:101);
    else if(id==='transformed-ledeburite'||id==='ledeburite')tone=phase==='C'?246:magnification==='low'?73:109;
    else if(phase==='C')tone=247;
    else if(phase==='A')tone=221;
@@ -110,7 +150,10 @@ export function renderSlicePixels(slice,options={}){
     tone+=(hash(grain,7,seed)-.5)*12+(hash(sx,sy,seed)-.5)*6;
     const nx=(x+.5-width/2)/(width/2),ny=(y+.5-height/2)/(height/2);
     tone-=Math.max(0,nx*nx+ny*ny-.2)*8;
-    const adjacent=etchable(s)&&((sx>0&&etchable(s-1)&&source.grainLabels[s-1]!==grain)||(sy>0&&etchable(s-width)&&source.grainLabels[s-width]!==grain));
+    // With boundary labels, a line is drawn only between grains of the same constituent:
+    // α/pearlite interfaces show by tone, and prior γ boundaries do not cross ferrite.
+    const edge=j=>etchable(j)&&edgeLabels[j]!==edgeLabels[s]&&(!source.boundaryLabels||source.partLabels[j]===part);
+    const adjacent=etchable(s)&&((sx>0&&edge(s-1))||(sy>0&&edge(s-width)));
     if(adjacent&&!lamellar)tone*=.5;
    }
    colour=[tone,tone,tone];
@@ -118,13 +161,15 @@ export function renderSlicePixels(slice,options={}){
   // Same phase does not mean same grain. Show the existing 3D grain ownership
   // on solid phase/constituent views as a thin presentation overlay. A line is
   // not a second phase or a cementite film; all identity maps remain unchanged.
-  const samePhaseGrainEdge=etchable(s)&&((sx>0&&etchable(s-1)&&source.grainLabels[s-1]!==grain&&source.phaseLabels[s-1]===p)
-    ||(sy>0&&etchable(s-width)&&source.grainLabels[s-width]!==grain&&source.phaseLabels[s-width]===p));
+  // Lamellar pixels compare constituents, not their sub-pixel α/θ identity.
+  const same=j=>look(s)?source.partLabels[j]===part:source.phaseLabels[j]===p;
+  const samePhaseGrainEdge=etchable(s)&&((sx>0&&etchable(s-1)&&edgeLabels[s-1]!==edgeLabels[s]&&same(s-1))
+    ||(sy>0&&etchable(s-width)&&edgeLabels[s-width]!==edgeLabels[s]&&same(s-width)));
   if(options.boundaries!==false&&mode!=='etched'&&phase&&phase!=='L'&&samePhaseGrainEdge)
     colour=colour.map(channel=>channel*.58);
   const n=i*4;pixels[n]=clamp(colour[0]);pixels[n+1]=clamp(colour[1]);pixels[n+2]=clamp(colour[2]);pixels[n+3]=255;
  }
- return {width,height,pixels,phaseLabels,partLabels,grainLabels,sourceIndices,phaseCodes:source.phaseCodes,partIds:source.partIds,mode,magnification,warning,seed};
+ return {width,height,pixels,phaseLabels,partLabels,grainLabels,sourceIndices,phaseCodes:source.phaseCodes,partIds:source.partIds,mode,magnification,warning,seed,pixelUm:Number.isFinite(slice.pixelUm)?slice.pixelUm/(source.presampled?1:zoom):null};
 }
 
 /** Canvas adapter, usable by cube face textures, the standalone cut view and PNG
@@ -137,9 +182,11 @@ export function renderSlice(canvas,model,options={}){
   if(ctx){ctx.fillStyle='#f6f5f1';ctx.fillRect(0,0,480,160);ctx.fillStyle='#39443e';ctx.font='14px system-ui';wrap(ctx,tr('kesit.unavailable',lang),20,45,440,22);}
   return {available:false,warning:tr('kesit.unavailable',lang)};
  }
- const resolution=options.resolution||192,raw=model.slice(options.axis||'z',options.depth??1,resolution,options.extent);
+ // Medium/high magnification samples a smaller window at full resolution (new detail).
+ const resolution=options.resolution||192,raw=model.slice(options.axis||'z',options.depth??1,resolution,options.extent,MAGNIFICATION_ZOOM[options.magnification||'medium']??1.35);
  const data=renderSlicePixels(raw,{phaseColours:raw.colors?.phases,partColours:raw.colors?.constituents,...options,carbon:options.carbon??raw.carbon,temperature:options.temperature??raw.temperature,eutectoidTemperature:options.eutectoidTemperature??raw.eutectoidTemperature});
  const info=options.info!==false,font=Math.max(9,Math.min(14,data.width/28));
+ const scaleBar=(options.scaleBar??info)&&Number.isFinite(data.pixelUm)?niceScaleBar(data.pixelUm,data.width):null;
  canvas.width=data.width;
  const ctx=canvas.getContext('2d');if(!ctx)return {...data,available:false};
  ctx.font=`${font}px system-ui,sans-serif`;
@@ -150,6 +197,12 @@ export function renderSlice(canvas,model,options={}){
  const strip=info?Math.ceil(22+font+noteLines.reduce((n,lines)=>n+lines.length*(font+4)+4,0)):0;
  canvas.height=data.height+strip;
  const image=ctx.createImageData(data.width,data.height);image.data.set(data.pixels);ctx.putImageData(image,0,0);
+ if(scaleBar){
+  const h=Math.max(3,Math.round(font/3)),x=Math.round(font*.8),y=data.height-Math.round(font*.8)-h,label=`${scaleBar.um.toLocaleString(lang==='en'?'en-US':'tr-TR')} µm`;
+  ctx.font=`600 ${font}px system-ui,sans-serif`;const tw=ctx.measureText?.(label)?.width??label.length*font*.55;
+  ctx.fillStyle='rgba(255,255,255,.82)';ctx.fillRect(x-5,y-font-8,Math.max(scaleBar.px,tw)+10,font+h+13);
+  ctx.fillStyle='#16201c';ctx.fillRect(x,y,scaleBar.px,h);ctx.fillText(label,x,y-5);
+ }
  if(data.mode==='etched'){
   ctx.strokeStyle='rgba(40,40,40,.35)';ctx.lineWidth=1;ctx.strokeRect(.5,.5,data.width-1,data.height-1);
  }
@@ -164,7 +217,12 @@ export function renderSlice(canvas,model,options={}){
   let y=data.height+2*font+13;
   for(const lines of noteLines){for(const line of lines){ctx.fillText(line,10,y);y+=font+4;}y+=4;}
  }
- return {...data,available:true,canvasWidth:canvas.width,canvasHeight:canvas.height};
+ return {...data,scaleBar,available:true,canvasWidth:canvas.width,canvasHeight:canvas.height};
+}
+/** Scale bar of a 1–2–5 length close to a fifth of the image width. */
+export function niceScaleBar(pixelUm,width){
+ const target=pixelUm*width/5,p=10**Math.floor(Math.log10(target)),um=[1,2,5,10].map(k=>k*p).filter(v=>v<=target*1.3).at(-1)||p;
+ return {um:Number(um.toPrecision(3)),px:Math.round(um/pixelUm)};
 }
 function wrap(ctx,text,x,y,maxWidth,lineHeight){
  for(const line of wrappedLines(ctx,text,maxWidth)){ctx.fillText(line,x,y);y+=lineHeight;}return y-lineHeight;

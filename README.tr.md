@@ -110,7 +110,7 @@ Kartlardaki bilgi düğmeleri kavramların ne anlama geldiğini açıklar. Yeni 
 - **Diyagramda ikinci bir okuma katmanı** — faz sınırlarından ayrı çizilen P/S/E/C bileşim referansları ve seçilebilir yavaş soğuma bileşen bölgeleri.
 - **Yeniden kullanılabilir 3B inceleyici** — yüzen giriş, korunan kamera ve seçim, kesit düzlemleri, faz/bileşen/tane renkleri ve atomik referans görünümü.
 - **Morfolojiye duyarlı yerleşim** — allotriomorf ferrit, perlit kolonileri, Fe₃C(II) ağları, <100> dendritler, sürekli sementit matrisinde ledeburit çubukları ve birincil sementit levhaları; hepsi kaynak bütçesinin tam içinde.
-- **Ortak 2B kesit** — küpün kendi kimlik haritası, göreli büyütme, temsili Nital görünümü, deterministik optik etkiler ve bilgi şeritli PNG çıktısı.
+- **Ortak 2B kesit** — küpün kendi kimlik haritası, yeniden örneklenen gerçek büyütme ve µm ölçek çubuğu, temsili Nital görünümü, deterministik optik etkiler ve bilgi şeritli PNG çıktısı.
 - **Yeniden üretilebilir tanıtım** — aynı kaynak hesap ve geometriden üretilmiş, iki dilde kısa bir soğuma akışı.
 
 Özgün proje zaten yavaş soğuma bileşen tahminleri içeriyor. Bu fork onların açıklamasını, seçili denge durumuyla bağlantısını ve görsel incelemesini geliştiriyor; bu kavramları ilk kez getirdiğini iddia etmiyor.
@@ -126,7 +126,8 @@ Mobilde diyagram, okunmayacak kadar küçültülmek yerine geniş çalışma ala
 | :--- | :--- |
 | [Aynı hacim, üç görünüm](web/gorseller/readme-display-modes.webp) | En yüksek ayrıntıda sekiz hesap durumunun faz küpleri, bileşen küpleri ve dağlanmış kesitleri. |
 | [Kesit morfolojisi](web/gorseller/readme-morphology.webp) | Her bileşenin nasıl yerleştirildiğini gösteren altı hesap durumu. |
-| [Kesit karşılaştırma paftası](web/gorseller/kesit-paftasi.png) | Yedi bileşim, üç görünüm ve üç göreli büyütme. |
+| [Kesit karşılaştırma paftası](web/gorseller/kesit-paftasi.png) | Yedi bileşim, üç görünüm ve üç büyütme; temsili ölçek çubuklarıyla. |
+| [Gerçek büyütme](web/gorseller/olcek-buyutme.webp) | Aynı kesitte ×1'den ×15'e: perlit lamellerinin çözünürlükle ayrışması. |
 | [Bağımsız kabul kontrolleri](docs/INDEPENDENT_ACCEPTANCE.md) | Korunum, değişmez ilerlemesi, geometri, ortak kesit kimlikleri ve kalan kabul sınırları. |
 | [3B inceleyici](docs/STAGE3_DELIVERY.md) · [Kesit ve animasyon](docs/STAGE3B4_DELIVERY.md) | Mimari, kontroller, yeniden üretilebilir varlıklar ve açık kapsam. |
 | [Kaynak iz karşılaştırması](hesap/rapor/og/TRACE_COMPARISON.md) | Yayındaki faz verisinin neden sessizce değiştirilmediği. |
@@ -187,10 +188,10 @@ Aşağıdaki galeri **gerçek arayüz ekranı değil**, uygulamanın ortak model
 - **Faz renkleri:** α, γ ve Fe₃C gibi denge fazlarını ayırır.
 - **Bileşen renkleri:** perlit, ledeburit ve ötektoid öncesi kökenleri ayırır.
 - **Tane sınırları:** çeliklerde çizilir; gerçek dağlamada eski östenit ağı görünmeyen ledeburit, birincil sementit ve dendritik dökümlerde gizlenir.
-- **Dağlanmış görünüm:** temsili Nital kontrastı; sementit parlak, ferrit açık, perlitik bölgeler koyudur.
-- **Göreli büyütme:** yeni bir mikroyapı üretmez; aynı kesitte farklı yakınlıkta inceleme sağlar.
+- **Dağlanmış görünüm:** temsili Nital kontrastı; serbest sementit parlak, ferrit açıktır. Perlit çözünürlük altındayken koyu ve tek tonlu, çözünürken açık ferrit üzerinde koyu sementit lamelleridir.
+- **Büyütme:** aynı kesitin daha küçük bir penceresini yeniden örnekler; yeni ayrıntı gelir, yapı değişmez. Kesitte µm ölçek çubuğu gösterilir.
 - **Optik etkiler:** yüzey gürültüsü ve tane kontrastı kimlik haritasını değiştirmez.
-- **PNG dışa aktarma:** ayrı 512² kesite C, sıcaklık, soğuma varsayımı ve şematik/ölçeksiz bilgisi ekler.
+- **PNG dışa aktarma:** ayrı 512² kesite C, sıcaklık, soğuma varsayımı ve şematik/temsili ölçek bilgisi ve ölçek çubuğu ekler.
 
 Ötektoid üstünde veya kalan γ bulunduğunda dağlanmış mod, açıklamayla faz renklerine döner. Bu bir sıcak dağlama veya su verme simülasyonu değildir.
 
@@ -243,9 +244,23 @@ Aynı noktayı **faz**, **bileşen** ve **tane kimliği** renklerinde yeniden in
 
 ## Kesit karşılaştırma paftası
 
-[![Yedi bileşim, üç görünüm ve üç göreli büyütme düzeyinden oluşan 63 bölmeli kesit paftası](web/gorseller/kesit-paftasi.png)](web/gorseller/kesit-paftasi.png)
+[![Yedi bileşim, üç görünüm ve üç büyütme düzeyinden oluşan 63 bölmeli kesit paftası](web/gorseller/kesit-paftasi.png)](web/gorseller/kesit-paftasi.png)
 
-Büyük görüntüyü açarak düşük, orta ve yüksek göreli büyütmede aynı modelin kesitlerini karşılaştırabilirsin. Bu paftada fiziksel mikroskop büyütmesi veya mikrometre ölçeği iddia edilmez.
+Büyük görüntüyü açarak düşük, orta ve yüksek büyütmede aynı modelin kesitlerini karşılaştırabilirsin. Ölçek çubukları **temsili ölçek** varsayımına göredir: önceki östenit tanesi ≈40 µm, ferrit tanesi ≈12 µm, perlit lamel aralığı ≈0,5 µm. Bunlar tipik büyüklüklerdir; belirli bir numunenin ölçümü değildir.
+
+## Gerçekçilik 2: ölçek, ferrit taneleri ve piksel süzgeci
+
+[![Aynı kesitte ×1'den ×15'e gerçek büyütme: perlit lamelleri çözünürlükle ayrışıyor](web/gorseller/olcek-buyutme.webp)](web/gorseller/olcek-buyutme.webp)
+
+- **Fiziksel ölçek:** lamel sıklığı artık görüntü çözünürlüğüne göre değil, varsayılan lamel aralığına göre hesaplanır.
+- **Piksel süzgeci:** lamel deseninin piksel üzerindeki ortalaması analitik olarak alınır (kutu süzgeci). Hare oluşmaz; düşük büyütmede perlit koyu ve tek tonlu, yüksek büyütmede lamelli görünür. Eğik kesilen kolonilerde görünen aralık λ/sinθ olur.
+- **Ferrit:** eski östenit sınırı ferritin içinden çizilmez; ferritin kendi taneleri (≈12 µm) gösterilir. Sınır bandının kalınlığı yüzden yüze değişir; ferrit payı büyüyünce tane içi adacık ferritler (idiomorf) belirir.
+- **İkincil sementit:** az olduğunda boncuklu, arttıkça sürekli ağ.
+- **Faz renkleri:** çözünürlük altındaki perlit, alan payı korunarak koloninin gerçek lamel yönünde şematik çizgilerle gösterilir.
+- Görünüm katmanı kimlik haritasını değiştirmez; testler: `tests/mikroyapi-gercekcilik-2-independent.test.mjs`.
+
+> [!CAUTION]
+> **Kod yazımı:** Bu bölümün kodu, Anthropic'in **Claude Opus 5.5** modelinin kod yazma becerileri ve Oğuzhan Gül'ün denetimiyle birlikte yazıldı. Yöntem, metalurjik kurallar ve kabul ölçütleri Oğuzhan Gül'e aittir; her değişiklik testlerle ve görsel kontrolle doğrulanarak kabul edildi.
 
 ## Modeli doğru okumak
 

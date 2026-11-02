@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "scope": "Offline schematic renders of the actual shared runtime model, not UI screenshots or measured micrographs",
   "quality": "maximum",
   "grains": 384,
@@ -39,20 +39,20 @@
       "carbon": 0.2,
       "temperature": 650,
       "files": {
-        "phases": {
-          "top": "0-phases-top.rgba",
-          "left": "0-phases-left.rgba",
-          "right": "0-phases-right.rgba"
-        },
-        "constituents": {
-          "top": "0-constituents-top.rgba",
-          "left": "0-constituents-left.rgba",
-          "right": "0-constituents-right.rgba"
-        },
-        "etched": {
-          "top": "0-etched-top.rgba"
-        }
+        "phases-top": "0-phases-top.rgb",
+        "constituents-top": "0-constituents-top.rgb",
+        "hybrid-top": "0-hybrid-top.rgb",
+        "phases-x": "0-phases-x.rgb",
+        "constituents-x": "0-constituents-x.rgb",
+        "hybrid-x": "0-hybrid-x.rgb",
+        "phases-y": "0-phases-y.rgb",
+        "constituents-y": "0-constituents-y.rgb",
+        "hybrid-y": "0-hybrid-y.rgb",
+        "section": "0-section.rgb"
       },
+      "faceResolution": 384,
+      "etchedValid": true,
+      "sectionPixelUm": 0.42062976685929154,
       "phases": [
         {
           "f": "A",
@@ -85,20 +85,20 @@
       "carbon": 0.45,
       "temperature": 650,
       "files": {
-        "phases": {
-          "top": "1-phases-top.rgba",
-          "left": "1-phases-left.rgba",
-          "right": "1-phases-right.rgba"
-        },
-        "constituents": {
-          "top": "1-constituents-top.rgba",
-          "left": "1-constituents-left.rgba",
-          "right": "1-constituents-right.rgba"
-        },
-        "etched": {
-          "top": "1-etched-top.rgba"
-        }
+        "phases-top": "1-phases-top.rgb",
+        "constituents-top": "1-constituents-top.rgb",
+        "hybrid-top": "1-hybrid-top.rgb",
+        "phases-x": "1-phases-x.rgb",
+        "constituents-x": "1-constituents-x.rgb",
+        "hybrid-x": "1-hybrid-x.rgb",
+        "phases-y": "1-phases-y.rgb",
+        "constituents-y": "1-constituents-y.rgb",
+        "hybrid-y": "1-hybrid-y.rgb",
+        "section": "1-section.rgb"
       },
+      "faceResolution": 384,
+      "etchedValid": true,
+      "sectionPixelUm": 0.42062976685929154,
       "phases": [
         {
           "f": "A",
@@ -131,20 +131,20 @@
       "carbon": 0.7615415057455133,
       "temperature": 650,
       "files": {
-        "phases": {
-          "top": "2-phases-top.rgba",
-          "left": "2-phases-left.rgba",
-          "right": "2-phases-right.rgba"
-        },
-        "constituents": {
-          "top": "2-constituents-top.rgba",
-          "left": "2-constituents-left.rgba",
-          "right": "2-constituents-right.rgba"
-        },
-        "etched": {
-          "top": "2-etched-top.rgba"
-        }
+        "phases-top": "2-phases-top.rgb",
+        "constituents-top": "2-constituents-top.rgb",
+        "hybrid-top": "2-hybrid-top.rgb",
+        "phases-x": "2-phases-x.rgb",
+        "constituents-x": "2-constituents-x.rgb",
+        "hybrid-x": "2-hybrid-x.rgb",
+        "phases-y": "2-phases-y.rgb",
+        "constituents-y": "2-constituents-y.rgb",
+        "hybrid-y": "2-hybrid-y.rgb",
+        "section": "2-section.rgb"
       },
+      "faceResolution": 384,
+      "etchedValid": true,
+      "sectionPixelUm": 0.42062976685929154,
       "phases": [
         {
           "f": "A",
@@ -169,20 +169,20 @@
       "carbon": 1.2,
       "temperature": 650,
       "files": {
-        "phases": {
-          "top": "3-phases-top.rgba",
-          "left": "3-phases-left.rgba",
-          "right": "3-phases-right.rgba"
-        },
-        "constituents": {
-          "top": "3-constituents-top.rgba",
-          "left": "3-constituents-left.rgba",
-          "right": "3-constituents-right.rgba"
-        },
-        "etched": {
-          "top": "3-etched-top.rgba"
-        }
+        "phases-top": "3-phases-top.rgb",
+        "constituents-top": "3-constituents-top.rgb",
+        "hybrid-top": "3-hybrid-top.rgb",
+        "phases-x": "3-phases-x.rgb",
+        "constituents-x": "3-constituents-x.rgb",
+        "hybrid-x": "3-hybrid-x.rgb",
+        "phases-y": "3-phases-y.rgb",
+        "constituents-y": "3-constituents-y.rgb",
+        "hybrid-y": "3-hybrid-y.rgb",
+        "section": "3-section.rgb"
       },
+      "faceResolution": 384,
+      "etchedValid": true,
+      "sectionPixelUm": 0.42062976685929154,
       "phases": [
         {
           "f": "A",
@@ -211,20 +211,20 @@
       "carbon": 3,
       "temperature": 650,
       "files": {
-        "phases": {
-          "top": "4-phases-top.rgba",
-          "left": "4-phases-left.rgba",
-          "right": "4-phases-right.rgba"
-        },
-        "constituents": {
-          "top": "4-constituents-top.rgba",
-          "left": "4-constituents-left.rgba",
-          "right": "4-constituents-right.rgba"
-        },
-        "etched": {
-          "top": "4-etched-top.rgba"
-        }
+        "phases-top": "4-phases-top.rgb",
+        "constituents-top": "4-constituents-top.rgb",
+        "hybrid-top": "4-hybrid-top.rgb",
+        "phases-x": "4-phases-x.rgb",
+        "constituents-x": "4-constituents-x.rgb",
+        "hybrid-x": "4-hybrid-x.rgb",
+        "phases-y": "4-phases-y.rgb",
+        "constituents-y": "4-constituents-y.rgb",
+        "hybrid-y": "4-hybrid-y.rgb",
+        "section": "4-section.rgb"
       },
+      "faceResolution": 384,
+      "etchedValid": true,
+      "sectionPixelUm": 0.42062976685929154,
       "phases": [
         {
           "f": "A",
@@ -257,20 +257,20 @@
       "carbon": 4.3832951241387486,
       "temperature": 650,
       "files": {
-        "phases": {
-          "top": "5-phases-top.rgba",
-          "left": "5-phases-left.rgba",
-          "right": "5-phases-right.rgba"
-        },
-        "constituents": {
-          "top": "5-constituents-top.rgba",
-          "left": "5-constituents-left.rgba",
-          "right": "5-constituents-right.rgba"
-        },
-        "etched": {
-          "top": "5-etched-top.rgba"
-        }
+        "phases-top": "5-phases-top.rgb",
+        "constituents-top": "5-constituents-top.rgb",
+        "hybrid-top": "5-hybrid-top.rgb",
+        "phases-x": "5-phases-x.rgb",
+        "constituents-x": "5-constituents-x.rgb",
+        "hybrid-x": "5-hybrid-x.rgb",
+        "phases-y": "5-phases-y.rgb",
+        "constituents-y": "5-constituents-y.rgb",
+        "hybrid-y": "5-hybrid-y.rgb",
+        "section": "5-section.rgb"
       },
+      "faceResolution": 384,
+      "etchedValid": true,
+      "sectionPixelUm": 0.42062976685929154,
       "phases": [
         {
           "f": "A",
@@ -295,20 +295,20 @@
       "carbon": 5,
       "temperature": 650,
       "files": {
-        "phases": {
-          "top": "6-phases-top.rgba",
-          "left": "6-phases-left.rgba",
-          "right": "6-phases-right.rgba"
-        },
-        "constituents": {
-          "top": "6-constituents-top.rgba",
-          "left": "6-constituents-left.rgba",
-          "right": "6-constituents-right.rgba"
-        },
-        "etched": {
-          "top": "6-etched-top.rgba"
-        }
+        "phases-top": "6-phases-top.rgb",
+        "constituents-top": "6-constituents-top.rgb",
+        "hybrid-top": "6-hybrid-top.rgb",
+        "phases-x": "6-phases-x.rgb",
+        "constituents-x": "6-constituents-x.rgb",
+        "hybrid-x": "6-hybrid-x.rgb",
+        "phases-y": "6-phases-y.rgb",
+        "constituents-y": "6-constituents-y.rgb",
+        "hybrid-y": "6-hybrid-y.rgb",
+        "section": "6-section.rgb"
       },
+      "faceResolution": 384,
+      "etchedValid": true,
+      "sectionPixelUm": 0.42062976685929154,
       "phases": [
         {
           "f": "A",
@@ -337,20 +337,20 @@
       "carbon": 4.3832951241387486,
       "temperature": 900,
       "files": {
-        "phases": {
-          "top": "7-phases-top.rgba",
-          "left": "7-phases-left.rgba",
-          "right": "7-phases-right.rgba"
-        },
-        "constituents": {
-          "top": "7-constituents-top.rgba",
-          "left": "7-constituents-left.rgba",
-          "right": "7-constituents-right.rgba"
-        },
-        "etched": {
-          "top": "7-etched-top.rgba"
-        }
+        "phases-top": "7-phases-top.rgb",
+        "constituents-top": "7-constituents-top.rgb",
+        "hybrid-top": "7-hybrid-top.rgb",
+        "phases-x": "7-phases-x.rgb",
+        "constituents-x": "7-constituents-x.rgb",
+        "hybrid-x": "7-hybrid-x.rgb",
+        "phases-y": "7-phases-y.rgb",
+        "constituents-y": "7-constituents-y.rgb",
+        "hybrid-y": "7-hybrid-y.rgb",
+        "section": "7-section.rgb"
       },
+      "faceResolution": 384,
+      "etchedValid": false,
+      "sectionPixelUm": 0.42062976685929154,
       "phases": [
         {
           "f": "G",

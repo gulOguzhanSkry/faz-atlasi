@@ -1,8 +1,8 @@
 /* SPDX-License-Identifier: MIT — on-demand Three.js inspector. */
 import * as THREE from '../vendor/three/three.module.min.js';
 import {OrbitControls} from '../vendor/three/OrbitControls.js';
-import {createModel,PHASE_COLORS,CONSTITUENT_COLORS} from './model.js';
-import {renderSlice,saveSlicePNG,registerSliceTranslations} from './kesit2d.js?v=1.2.2';
+import {createModel,PHASE_COLORS,CONSTITUENT_COLORS} from './model.js?v=1.3.0';
+import {renderSlice,saveSlicePNG,registerSliceTranslations} from './kesit2d.js?v=1.3.0';
 import {drawAtomicPhase,drawAtomicLesson,LESSON_COLORS} from './atom.js';
 import {phaseCrystal,cellShareCount,packingFraction,coordinationNumber,interstitialSummary,radiiAngstrom,CARBON_RADIUS_ANGSTROM} from './kristal-yapilar.js';
 import {lessonSteps} from './atom-dersleri.js';
@@ -111,7 +111,9 @@ export function mountCube(host,api){
    for(const name of ['holes','neighbours','volumes'])get('[data-kup-'+name+']').disabled=!reference.periodic||code==='C'&&name==='holes';
  }
  function paintSection(){
-   const result=renderSlice(canvas,model,{axis,depth,resolution:surface,mode:get('[data-kup-section-mode]').value,magnification:get('[data-kup-magnification]').value,effects:get('[data-kup-effects]').checked,info:false,lang,carbon:current.carbon,temperature:current.temperature,eutectoidTemperature:sourceData.invariants.otektoid.T});
+   // Magnified views sample more pixels so the 0.5 µm lamellae can resolve; playback keeps the face resolution.
+   const magnification=get('[data-kup-magnification]').value,resolution=playDirection?surface:Math.max(surface,{low:surface,medium:256,high:384}[magnification]||surface);
+   const result=renderSlice(canvas,model,{axis,depth,resolution,scaleBar:true,mode:get('[data-kup-section-mode]').value,magnification,effects:get('[data-kup-effects]').checked,info:false,lang,carbon:current.carbon,temperature:current.temperature,eutectoidTemperature:sourceData.invariants.otektoid.T});
    get('[data-kup-section-warning]').textContent=result.warning||'';
    const caption=get('[data-kup-section-caption]');if(caption)caption.textContent=`C ${current.carbon?.toLocaleString(lang,{maximumFractionDigits:3})} ${lang==='tr'?'ağ.%':'wt%'} · ${current.temperature?.toLocaleString(lang,{maximumFractionDigits:1})} °C · ${t('kup.scope')}`;
  }

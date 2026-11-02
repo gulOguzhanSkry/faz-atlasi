@@ -110,7 +110,7 @@ Information buttons explain the metallurgical concepts behind the cards. The new
 - **A second reading layer on the diagram** — P/S/E/C composition references and selectable slow-cooling constituent regions, distinct from phase boundaries.
 - **A reusable 3D inspector** — floating dock, retained camera and selection, section planes, phase/constituent/grain colours, and an atomic reference view.
 - **Morphology-aware placement** — allotriomorphic ferrite, pearlite colonies, Fe₃C(II) networks, <100> dendrites, ledeburite rods in a continuous cementite matrix and primary cementite plates, all within the exact source budget.
-- **A shared 2D section** — the cube's own label map, relative magnification, illustrative Nital appearance, deterministic optical effects and annotated PNG export.
+- **A shared 2D section** — the cube's own label map, true resampled magnification with a µm scale bar, illustrative Nital appearance, deterministic optical effects and annotated PNG export.
 - **A reproducible introduction** — a short cooling sequence generated from the same source calculation and geometry, in both interface languages.
 
 The original project already includes slow-cooling constituent estimates. This fork extends their explanation, source-state connection and visual exploration; it does not claim to have introduced those concepts.
@@ -126,7 +126,8 @@ The mobile diagram keeps its working area instead of shrinking the plot to an un
 | :--- | :--- |
 | [Same volume, three displays](web/gorseller/readme-display-modes-en.webp) | Maximum-detail phase cubes, constituent cubes and etched sections from eight computed states. |
 | [Section morphology](web/gorseller/readme-morphology-en.webp) | Six calculated states showing how each constituent is placed. |
-| [Section comparison sheet](web/gorseller/kesit-paftasi.png) | Seven compositions, three appearances and three relative magnifications. |
+| [Section comparison sheet](web/gorseller/kesit-paftasi-en.png) | Seven compositions, three appearances and three magnifications, with representative scale bars. |
+| [True magnification](web/gorseller/olcek-buyutme-en.webp) | One section from ×1 to ×15: pearlite lamellae resolve with pixel size. |
 | [Independent acceptance](docs/INDEPENDENT_ACCEPTANCE.md) | Conservation, invariant progress, geometry, shared-section identities and remaining acceptance limits. |
 | [3D inspector](docs/STAGE3_DELIVERY.md) · [Section and animation](docs/STAGE3B4_DELIVERY.md) | Architecture, controls, reproducible assets and explicitly stated scope. |
 | [Source-trace comparison](hesap/rapor/og/TRACE_COMPARISON.md) | Why the shipped phase data was retained rather than silently replaced. |
@@ -187,10 +188,10 @@ The gallery below contains **offline renders from the application's shared model
 - **Phase colours:** distinguish equilibrium phases such as α, γ and Fe₃C.
 - **Constituent colours:** distinguish pearlite, ledeburite and proeutectoid ancestry.
 - **Grain boundaries:** drawn in steels; suppressed inside ledeburite, primary cementite and dendritic castings, where real etching shows no prior-austenite network.
-- **Etched appearance:** illustrative Nital contrast, with bright cementite, light ferrite and dark pearlitic regions.
-- **Relative magnification:** examines the same section more closely without generating a different structure.
+- **Etched appearance:** illustrative Nital contrast; free cementite bright, ferrite light. Unresolved pearlite is a uniform dark constituent; resolved pearlite shows dark cementite lamellae on light ferrite.
+- **Magnification:** resamples a smaller window of the same section, so detail is added without changing the structure. A µm scale bar is drawn on the section.
 - **Optical effects:** surface noise and grain contrast do not change the identity map.
-- **PNG export:** renders a separate 512² section with C, temperature, cooling assumption and schematic/unscaled metadata.
+- **PNG export:** renders a separate 512² section with C, temperature, cooling assumption and schematic/representative-scale metadata and a scale bar.
 
 Above the eutectoid, or while residual γ remains, etched mode falls back to phase colours with an explanation. This is not a hot-etching or quenching simulation.
 
@@ -243,9 +244,23 @@ The 0.45 wt% C example moves from 900 °C to the eutectoid, through ξ steps at 
 
 ## Section comparison sheet
 
-[![63-panel comparison of seven compositions, three displays and three relative magnification levels](web/gorseller/kesit-paftasi.png)](web/gorseller/kesit-paftasi.png)
+[![63-panel comparison of seven compositions, three displays and three magnification levels](web/gorseller/kesit-paftasi-en.png)](web/gorseller/kesit-paftasi-en.png)
 
-Open the full image to compare low, medium and high relative magnification using sections of the same model. The sheet claims neither a calibrated microscope magnification nor a micrometre scale.
+Open the full image to compare low, medium and high magnification using sections of the same model. Scale bars follow a **representative scale** assumption: prior-austenite grain ≈40 µm, ferrite grain ≈12 µm, pearlite lamellar spacing ≈0.5 µm. These are typical sizes, not measurements of a specific specimen.
+
+## Realism 2: scale, ferrite grains and the pixel filter
+
+[![True magnification from ×1 to ×15 on one section: pearlite lamellae resolve](web/gorseller/olcek-buyutme-en.webp)](web/gorseller/olcek-buyutme-en.webp)
+
+- **Physical scale:** lamella frequency now follows the assumed spacing, not the image resolution.
+- **Pixel filter:** the lamella pattern is averaged analytically over each pixel (box filter). No moiré; pearlite is uniformly dark at low magnification and lamellar at high magnification. Obliquely cut colonies show the apparent spacing λ/sin θ.
+- **Ferrite:** the prior-austenite boundary is not drawn through ferrite; ferrite shows its own grains (≈12 µm). Band thickness varies from facet to facet, and intragranular idiomorphs appear at large ferrite fractions.
+- **Secondary cementite:** beaded when scarce, a connected network when abundant.
+- **Phase colours:** unresolved pearlite is drawn as schematic stripes along each colony's real lamella direction, preserving area fractions.
+- The appearance layer never changes the identity map; tests: `tests/mikroyapi-gercekcilik-2-independent.test.mjs`.
+
+> [!CAUTION]
+> **Code authorship:** the code for this part was written together with Anthropic's **Claude Opus 5.5** coding capabilities under Oğuzhan Gül's supervision. The method, metallurgical rules and acceptance criteria are Oğuzhan Gül's; every change was accepted after tests and visual checks.
 
 ## Read the model correctly
 

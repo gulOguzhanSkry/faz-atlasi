@@ -15,7 +15,7 @@
     {
       "input": "src/domain/phase-atlas/geometry/constituent-occupancy.ts",
       "output": "bilesen-yerlesimi.js",
-      "sha256": "e785c1b7255f975c524486b58f1e985bc0d3f4587d6f7fd8573235b21f1b56c2"
+      "sha256": "5eaba68aeff1e9eb3549bd6d6e5ea3534f9628bf140e21db123239cedae5f418"
     },
     {
       "input": "src/domain/phase-atlas/crystal-structures.ts",

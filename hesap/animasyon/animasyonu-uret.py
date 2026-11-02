@@ -99,7 +99,7 @@ def render(frame, language='tr'):
         draw.text((tx+24,yy+27),pct,font=font(23,True),fill='#293a33')
         yy+=76
     draw.line((48,728,W-48,728),fill='#c8cbbf',width=1)
-    draw.text((48,743),'ŞEMATİK · ÖLÇEKSİZ · KİNETİK HESABI DEĞİLDİR' if not en else 'SCHEMATIC · UNSCALED · NOT A KINETIC SIMULATION',font=font(13,True),fill='#6b736b')
+    draw.text((48,743),'ŞEMATİK · TEMSİLİ ÖLÇEK · KİNETİK HESABI DEĞİLDİR' if not en else 'SCHEMATIC · REPRESENTATIVE SCALE · NOT A KINETIC SIMULATION',font=font(13,True),fill='#6b736b')
     draw.text((W-390,743),'Faz Atlası / acarcemal · OG fork',font=font(13),fill='#6b736b')
     return im.convert('RGB')
 

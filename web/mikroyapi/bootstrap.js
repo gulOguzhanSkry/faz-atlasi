@@ -11,7 +11,7 @@
   'kup.loading':['3B ve kesit modülleri hazırlanıyor…','Preparing 3D and section modules…'],
   'kup.unavailable':['Hesap çözülmedi. Önce diyagramda geçerli bir nokta veya değişmezde ξ seçin.','Unresolved state. Select a valid diagram point or choose ξ at an invariant.'],
   'kup.alloy':['Yalnız ikili Fe–Fe₃C. Alaşımlı kesitte kapalı.','Binary Fe–Fe₃C only. Disabled for alloy isopleths.'],
-  'kup.scope':['Şematik · ölçeksiz · kütle paylarının çizimi. İnce çizgiler geometrik tane sınırlarıdır, yeni faz değildir. Kinetik veya ölçülmüş mikrograf değildir.','Schematic · unscaled · drawing of mass fractions. Thin lines are geometric grain boundaries, not another phase. Not kinetics or a measured micrograph.'],
+  'kup.scope':['Şematik · temsili ölçek (önceki östenit tanesi ≈40 µm, lamel aralığı ≈0,5 µm varsayıldı) · kütle paylarının çizimi. İnce çizgiler tane sınırlarıdır, yeni faz değildir. Kinetik veya ölçülmüş mikrograf değildir.','Schematic · representative scale (prior-austenite grain ≈40 µm, lamellar spacing ≈0.5 µm assumed) · drawing of mass fractions. Thin lines are grain boundaries, not a new phase. Not kinetic, not a measured micrograph.'],
   'kup.scale':['Görünüm ölçeği','Viewing scale'],
   'kup.volume':['Tane hacmi ve kesit','Grain volume and section'],
   'kup.atomic':['Atomik yapı / kristal hücresi','Atomic structure / crystal cell'],
@@ -43,7 +43,7 @@
   'kup.section':['Aynı hacimden 2B kesit','2D section of the same volume'],
   'kup.sectionMode':['Kesit görünümü','Section appearance'],
   'kup.etched':['Dağlanmış görünüm · temsili Nital','Etched appearance · illustrative Nital'],
-  'kup.magnification':['Göreli büyütme · fiziksel ölçek değil','Relative magnification · not a physical scale'],
+  'kup.magnification':['Büyütme · temsili ölçek çubuğu kesitte','Magnification · representative scale bar on the section'],
   'kup.low':['Düşük','Low'],'kup.medium':['Orta','Medium'],'kup.high':['Yüksek','High'],
   'kup.effects':['Yüzey ve ışık etkileri','Surface and illumination effects'],
   'kup.export':['Kesiti PNG kaydet ↓','Save section PNG ↓'],
@@ -153,7 +153,7 @@
    if(!dialog.open)dialog.showModal();opened=true;dock.hidden=true;if(!controller)summary.textContent=t('kup.loading');
    try{
      if(!controller){
-       loading??=import('./kup.js?v=1.2.2');const module=await loading;
+       loading??=import('./kup.js?v=1.3.0');const module=await loading;
        controller=module.mountCube(dialog,{t,register:sozlukEkle,lang:DIL,getState:state,sourceData:D,selectTemperature:T=>sec(null,T),boundaries:C=>gecisler(C).map(g=>g.T)});
      }
      controller.open();controller.setState(state());

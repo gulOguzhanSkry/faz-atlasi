@@ -15,6 +15,50 @@ const CONSTITUENT_COLORS = {
   cementite: "#70536c",
   "primary-solid": "#8b8f8c"
 };
+const MICRO_SCALE = Object.freeze({ priorGrainUm: 40, lamellaSpacingUm: 0.5, ferriteGrainUm: 12, ledeburitePearliteFactor: 1.6 });
+function lamellaCoverage(x0, x1, c) {
+  if (!(c > 0)) return 0;
+  if (c >= 1) return 1;
+  const F = (x) => {
+    const i = Math.floor(x), f = x - i;
+    return i * c + Math.min(c, Math.max(0, f - (0.5 - c / 2)));
+  };
+  if (Math.abs(x1 - x0) < 1e-9) {
+    const f = x0 - Math.floor(x0);
+    return f > 0.5 - c / 2 && f < 0.5 + c / 2 ? 1 : 0;
+  }
+  return (F(Math.max(x0, x1)) - F(Math.min(x0, x1))) / Math.abs(x1 - x0);
+}
+const isFerriteBand = (part) => part.placement === "boundary" && Object.keys(part.phases).length === 1 && (part.phases.A ?? 0) > 0;
+class LazyFieldView {
+  constructor(probe) {
+    this.probe = probe;
+  }
+  probe;
+  get interface() {
+    return this.probe("interface");
+  }
+  get ferrite() {
+    return this.probe("ferrite");
+  }
+  get dendrite() {
+    return this.probe("dendrite");
+  }
+  get plate() {
+    return this.probe("plate");
+  }
+  get lamella() {
+    return this.probe("lamella");
+  }
+  get fine() {
+    return this.probe("fine");
+  }
+  get island() {
+    return this.probe("island");
+  }
+}
+const bandScore = (lam) => Math.abs(lam - Math.floor(lam) - 0.5) * 2;
+const gaussian = (u, v) => Math.sqrt(-2 * Math.log(Math.max(1e-12, u))) * Math.cos(2 * Math.PI * v);
 const finite = (n) => Number.isFinite(n);
 const before = (value, index, cut) => value < cut.value || value === cut.value && index <= cut.index;
 const END = { value: Infinity, index: Infinity };
@@ -43,7 +87,7 @@ class ConstituentOccupancy {
     this.size = size;
     const n = size, total = n ** 3;
     for (const s of volume.seeds) this.seedById.set(s.id, s);
-    this.lamellaFrequency = Math.min(22, surfaceDetail / 5);
+    this.lamellaFrequency = this.unitUm / MICRO_SCALE.lamellaSpacingUm;
     this.islandFrequency = Math.min(11, surfaceDetail / 9);
     this.labels = new Uint8Array(total);
     this.partLabels = new Uint8Array(total);
@@ -66,6 +110,7 @@ class ConstituentOccupancy {
   }
   /** Fills every missing grid in one pass so nearest-seed and colony lookups are shared. */
   ensure(names) {
+    if (names.includes("ferrite") && !this.grids.has("interface")) this.ensure(["interface"]);
     const todo = [...new Set(names)].filter((k) => !this.grids.has(k));
     if (!todo.length) return;
     const n = this.size, out = todo.map(() => new Float64Array(n ** 3));
@@ -101,6 +146,10 @@ class ConstituentOccupancy {
   /** Grain length scale (mean seed spacing) in normalised volume units. */
   get grainScale() {
     return Math.cbrt(1 / Math.max(1, this.volume.seeds.length));
+  }
+  /** Micrometres per volume unit implied by MICRO_SCALE.priorGrainUm. */
+  get unitUm() {
+    return MICRO_SCALE.priorGrainUm / this.grainScale;
   }
   /** Deterministic trilinear value noise in [0,1]. */
   noise(x, y, z, salt) {
@@ -224,11 +273,58 @@ class ConstituentOccupancy {
     return { a, b, id, id2 };
   }
   warped(p) {
-    const G = this.grainScale, amp = 0.35 / this.lamellaFrequency;
+    const G = this.grainScale, amp = 0.02 * G;
     return [p[0] + amp * this.fbm(p, 2 / G, 101), p[1] + amp * this.fbm(p, 2 / G, 131), p[2] + amp * this.fbm(p, 2 / G, 161)];
   }
+  /** Log-normal thickness factor of the boundary facet between two prior grains (σ = 0.45). */
+  facetFactor(id, id2) {
+    if (!id2) return 1;
+    const a = Math.min(id, id2), b = Math.max(id, id2);
+    return Math.exp(0.45 * gaussian(hash(a, b, 301), hash(a, b, 302)));
+  }
   fInterface(p, nr) {
-    return (Number.isFinite(nr.b) ? nr.b - nr.a : 0) * (1 + 0.7 * this.fbm(p, 3 / this.grainScale, 211));
+    const G = this.grainScale, d = Number.isFinite(nr.b) ? nr.b - nr.a : 0;
+    return d / this.facetFactor(nr.id, nr.id2) * (1 + 0.35 * this.fbm(p, 3 / G, 211)) + 0.03 * G * G * Math.max(0, this.fbm(p, 4 / G, 223));
+  }
+  /** Idiomorph nuclei (inclusions) inside grains: one jittered site per cell of size 0.85 G, 55 % occupied. */
+  idiomorphDistance(p) {
+    const h = 0.85 * this.grainScale, gx = Math.floor(p[0] / h), gy = Math.floor(p[1] / h), gz = Math.floor(p[2] / h);
+    let best = Infinity;
+    for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) for (let k = -1; k <= 1; k++) {
+      const cx = gx + i, cy = gy + j, cz = gz + k;
+      if (hash(cx, cy, cz, 331) > 0.55) continue;
+      const d = Math.hypot(p[0] - (cx + 0.15 + 0.7 * hash(cx, cy, cz, 332)) * h, p[1] - (cy + 0.15 + 0.7 * hash(cx, cy, cz, 333)) * h, p[2] - (cz + 0.15 + 0.7 * hash(cx, cy, cz, 334)) * h);
+      if (d < best) best = d;
+    }
+    return best;
+  }
+  idioS0;
+  /** Interface score at the 35 % quantile: idiomorphs only nucleate once the boundary band is that thick. */
+  get idiomorphOnset() {
+    if (this.idioS0 !== void 0) return this.idioS0;
+    const g = this.grid("interface"), o = this.order("interface", g);
+    return this.idioS0 = g[o[Math.floor(0.35 * (o.length - 1))]];
+  }
+  fFerrite(p, nr) {
+    const r = 0.09 * this.grainScale, d = this.idiomorphDistance(p);
+    return Math.min(this.fInterface(p, nr), this.idiomorphOnset * (1 + (d / r) ** 2));
+  }
+  /**
+   * Proeutectoid-ferrite grain identity: nearest jittered nucleus on a lattice with the
+   * physical ferrite grain size. Display only: ferrite–ferrite boundaries replace the prior
+   * austenite boundary, which is not visible inside ferrite.
+   */
+  ferriteGrain(p) {
+    const h = MICRO_SCALE.ferriteGrainUm / this.unitUm, gx = Math.floor(p[0] / h), gy = Math.floor(p[1] / h), gz = Math.floor(p[2] / h);
+    let best = Infinity, id = 0;
+    for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) for (let k = -1; k <= 1; k++) {
+      const cx = gx + i, cy = gy + j, cz = gz + k, d = (p[0] - (cx + hash(cx, cy, cz, 341)) * h) ** 2 + (p[1] - (cy + hash(cx, cy, cz, 342)) * h) ** 2 + (p[2] - (cz + hash(cx, cy, cz, 343)) * h) ** 2;
+      if (d < best) {
+        best = d;
+        id = 1 + (cx + 512 & 1023) + 1024 * ((cy + 512 & 1023) + 1024 * (cz + 512 & 1023));
+      }
+    }
+    return id;
   }
   fDendrite(p, nr, limit = Infinity) {
     const d = this.dendriteSdf(this.seedById.get(nr.id), this.frame(nr.id), p, limit);
@@ -251,7 +347,12 @@ class ConstituentOccupancy {
     return best;
   }
   fLamella(p, nr) {
-    const id = nr.id, seed = this.seedById.get(id), G = this.grainScale;
+    const { lam } = this.lamellaCoord(p, nr.id);
+    return Math.abs(lam - Math.floor(lam) - 0.5) * 2;
+  }
+  /** Pearlite colonies: 2-5 per prior austenite grain, each with its own lamella normal. */
+  lamellaCoord(p, id) {
+    const seed = this.seedById.get(id), G = this.grainScale;
     const colonies = 2 + Math.floor(hash(id, 9, 9) * 4);
     let colony = 0, best = Infinity;
     for (let c = 0; c < colonies; c++) {
@@ -265,7 +366,7 @@ class ConstituentOccupancy {
     }
     const n = this.unitFromHash(id, colony, 73), q = this.warped(p);
     const lam = (n[0] * q[0] + n[1] * q[1] + n[2] * q[2]) * this.lamellaFrequency + hash(id, colony, 74);
-    return Math.abs(lam - Math.floor(lam) - 0.5) * 2;
+    return { lam, n, colony: id * 8 + colony };
   }
   fColony(p) {
     const Kc = Math.max(2, this.islandFrequency / 3.2);
@@ -314,36 +415,70 @@ class ConstituentOccupancy {
   }
   /** Fine lamellae inside transformed-ledeburite islands; one orientation per eutectic colony. */
   fFine(p, col) {
-    const { eid } = col, fineN = this.unitFromHash(eid[0] + 3, eid[1] + 5, eid[2] + 7), q = this.warped(p), fineLam = (fineN[0] * q[0] + fineN[1] * q[1] + fineN[2] * q[2]) * this.lamellaFrequency * 1.6 + hash(eid[0], eid[1], eid[2], 75);
-    return Math.abs(fineLam - Math.floor(fineLam) - 0.5) * 2;
+    const { lam } = this.fineCoord(p, col);
+    return Math.abs(lam - Math.floor(lam) - 0.5) * 2;
+  }
+  fineCoord(p, col) {
+    const { eid } = col, n = this.unitFromHash(eid[0] + 3, eid[1] + 5, eid[2] + 7), q = this.warped(p);
+    const lam = (n[0] * q[0] + n[1] * q[1] + n[2] * q[2]) * this.lamellaFrequency * MICRO_SCALE.ledeburitePearliteFactor + hash(eid[0], eid[1], eid[2], 75);
+    return { lam, n, colony: 1e6 + ((eid[0] & 1023) << 20 | (eid[1] & 1023) << 10 | eid[2] & 1023) };
   }
   fields(p) {
     const nr = this.nearest(p), col = this.fColony(p);
-    return { interface: this.fInterface(p, nr), dendrite: this.fDendrite(p, nr), plate: this.fPlate(p, nr), lamella: this.fLamella(p, nr), fine: this.fFine(p, col), island: this.fIsland(p, col) };
+    return { interface: this.fInterface(p, nr), ferrite: this.fFerrite(p, nr), dendrite: this.fDendrite(p, nr), plate: this.fPlate(p, nr), lamella: this.fLamella(p, nr), fine: this.fFine(p, col), island: this.fIsland(p, col) };
   }
   /** Lazy field access for continuous sampling: only the fields a plan actually needs are computed. */
   probe(p, exact = false) {
-    let nr, col;
+    let nr, col, lc, fc;
     const cache = {};
     const near = () => nr ??= this.nearest(p);
     const limit = exact ? Infinity : this.dendriteLimit;
-    return (name) => cache[name] ??= name === "interface" ? this.fInterface(p, near()) : name === "dendrite" ? this.fDendrite(p, near(), Number.isFinite(limit) ? limit + 1e-9 : Infinity) : name === "plate" ? this.fPlate(p, near()) : name === "lamella" ? this.fLamella(p, near()) : name === "island" ? this.fIsland(p, col ??= this.fColony(p)) : this.fFine(p, col ??= this.fColony(p));
+    const f = (name) => cache[name] ??= name === "interface" ? this.fInterface(p, near()) : name === "ferrite" ? this.fFerrite(p, near()) : name === "dendrite" ? this.fDendrite(p, near(), Number.isFinite(limit) ? limit + 1e-9 : Infinity) : name === "plate" ? this.fPlate(p, near()) : name === "lamella" ? bandScore((lc ??= this.lamellaCoord(p, near().id)).lam) : name === "island" ? this.fIsland(p, col ??= this.fColony(p)) : bandScore((fc ??= this.fineCoord(p, col ??= this.fColony(p))).lam);
+    return Object.assign(f, { coord: (kind) => kind === "lamella" ? lc ??= this.lamellaCoord(p, near().id) : fc ??= this.fineCoord(p, col ??= this.fColony(p)) });
   }
   /** Exact, lazily evaluated fields at one point. Safe to cache across temperature changes. */
   lazyFields(p) {
-    const f = this.probe(p, true), out = {};
-    for (const k of ["interface", "dendrite", "plate", "lamella", "fine", "island"]) Object.defineProperty(out, k, { get: () => f(k), enumerable: true });
-    return out;
+    return new LazyFieldView(this.probe(p, true));
   }
   /** Prior-austenite grain boundaries are etched lines only where the constituent has them:
    * never inside ledeburite (continuous cementite matrix), primary cementite plates or liquid. */
   drawsGrainBoundary(point) {
     const part = this.samplePart(point);
     if (this.arrangement === "dendritic" || this.arrangement === "primary-plates") return false;
+    if (isFerriteBand(part)) return false;
     return !["eutectic", "plate", "last"].includes(part.placement);
   }
-  fieldFor(arrangement, placement) {
+  /**
+   * Section appearance of a lamellar constituent at a point: cementite area fraction inside a
+   * square pixel of side `pixel` (volume units) spanned by in-plane unit vectors u, v. Returns
+   * null where the point is not inside a resolvable lamellar constituent (pearlite, or the
+   * pearlite islands of transformed ledeburite). Identity (sample) is unchanged by this.
+   * `at` lets a caller that already classified the point (part index, cached fields) skip
+   * the second classification.
+   */
+  lamellarAppearance(point, u, v, pixel, at) {
+    if (!(pixel > 0)) throw new RangeError("Invalid pixel size");
+    const k = at ? at.part : this.locate(point).part, plan = this.plans[k];
+    if (!plan) return null;
+    if (plan.phases.length < 2 || plan.phases[0] !== "C") return null;
+    const c = plan.phaseCuts[0].value;
+    let coord;
+    if (plan.part.placement === "eutectic") {
+      if (!plan.islandCut || !(c > 0)) return null;
+      const n = this.size, [x, y, z] = point.map((t) => Math.min(n - 1, Math.floor(t * n))), index = x + n * (y + n * z);
+      if (!before(at?.fields ? at.fields.island : this.probe(point)("island"), index, plan.islandCut)) return null;
+      coord = (at?.fields instanceof LazyFieldView ? at.fields.probe : this.probe(point, true)).coord("fine");
+    } else coord = (at?.fields instanceof LazyFieldView ? at.fields.probe : this.probe(point, true)).coord("lamella");
+    const share = Math.min(1, Math.max(0, c)), freq = this.lamellaFrequency * (plan.part.placement === "eutectic" ? MICRO_SCALE.ledeburitePearliteFactor : 1);
+    const nu = coord.n[0] * u[0] + coord.n[1] * u[1] + coord.n[2] * u[2], nv = coord.n[0] * v[0] + coord.n[1] * v[1] + coord.n[2] * v[2];
+    const inPlane = Math.max(1e-6, Math.hypot(nu, nv)), span = freq * pixel * (Math.abs(nu) + Math.abs(nv));
+    const lam = coord.lam;
+    return { coverage: lamellaCoverage(lam - span / 2, lam + span / 2, share), thetaShare: share, periodsPerPixel: freq * pixel * inPlane, apparentRatio: 1 / inPlane, colony: coord.colony, angle: Math.atan2(nv, nu) };
+  }
+  fieldFor(arrangement, part) {
+    const placement = part.placement;
     if (placement === "plate") return "plate";
+    if (arrangement === "grain-boundary" && isFerriteBand(part)) return "ferrite";
     return arrangement === "dendritic" || arrangement === "primary-plates" ? "dendrite" : "interface";
   }
   orders = /* @__PURE__ */ new Map();
@@ -383,10 +518,10 @@ class ConstituentOccupancy {
     const members = parts.map(() => []);
     this.ensure(parts.flatMap((p) => {
       const multi = Object.keys(p.phases).length > 1;
-      return [this.fieldFor(breakdown.arrangement, p.placement), ...!multi ? [] : p.placement === "eutectic" ? ["island", "fine"] : ["lamella"]];
+      return [this.fieldFor(breakdown.arrangement, p), ...!multi ? [] : p.placement === "eutectic" ? ["island", "fine"] : ["lamella"]];
     }));
     parts.forEach((part, k) => {
-      const field = this.fieldFor(breakdown.arrangement, part.placement), values = this.grid(field), order = this.order(field, values);
+      const field = this.fieldFor(breakdown.arrangement, part), values = this.grid(field), order = this.order(field, values);
       const last = k === parts.length - 1, want = last ? Infinity : counts[k], chosen = members[k];
       for (let j = 0; j < order.length && chosen.length < want; j++) {
         const i = order[j];
@@ -480,5 +615,8 @@ class ConstituentOccupancy {
 }
 export {
   CONSTITUENT_COLORS,
-  ConstituentOccupancy
+  ConstituentOccupancy,
+  MICRO_SCALE,
+  isFerriteBand,
+  lamellaCoverage
 };
