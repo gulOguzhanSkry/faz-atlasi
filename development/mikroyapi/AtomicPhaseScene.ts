@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import {crystalImages,exampleCarbon,carbonNeighbours,type PhaseCrystal,type Position} from '../../domain/phase-atlas/crystal-structures.ts';
+import {crystalImages,exampleCarbon,carbonNeighbours,classifySite,ironRadius,interstitialSummary,siteImages,phaseCrystal,OCTAHEDRAL,TETRAHEDRAL,REFERENCE_LATTICE,CARBON_RADIUS_ANGSTROM,type PhaseCrystal,type Position,type SiteClass} from '../../domain/phase-atlas/crystal-structures.ts';
+import type {LessonView} from '../../domain/phase-atlas/atomic-lessons.ts';
 import {idealInterstitialRadius,carbonImages,type CarbonPopulation} from '../../domain/phase-atlas/carbon-population.ts';
 import {coordinationHull} from '../../domain/phase-atlas/coordination-polyhedron.ts';
 /** Drawing uses fixed reference/prototype coordinates; no atomic simulation. */
@@ -45,4 +46,95 @@ export function drawAtomicPhase(group:THREE.Group,crystal:PhaseCrystal,repeats:n
   // Neighbours across the boundary are included as translucent periodic images.
   spheres(neighbours.filter(p=>p.position.some(v=>v<0||v>n)).map(p=>p.position),'#809cae',radius,.45);
  }
+}
+
+/* ---------- Guided lesson drawing ---------- */
+export const LESSON_COLORS={corner:'#7f9db0',edge:'#8a7ac2',face:'#3d7fb1',body:'#c47a45',octa:'#2fa69a',tetra:'#8a63c9',carbon:'#f3b74e',near:'#d36b1f',far:'#8a969b'} as const;
+type Frame={world:(p:Position)=>THREE.Vector3;unit:number};
+/** Cell coordinates → world, with an optional offset along world x. */
+function frame(crystal:PhaseCrystal,n:number,unit:number,shift=0):Frame{
+ // Compare view is meant for a front camera: cells sit side by side along world x.
+ const across=new THREE.Vector3(shift,0,0);
+ return {unit,world:p=>new THREE.Vector3((p[0]-n/2)*crystal.cell[0]*unit,(p[2]-n/2)*crystal.cell[2]*unit,-(p[1]-n/2)*crystal.cell[1]*unit).add(across)};
+}
+function addSpheres(group:THREE.Group,f:Frame,positions:Position[],color:string,radius:number,opts:{opacity?:number;clip?:THREE.Plane[];side?:THREE.Side;name?:string}={}){
+ if(!positions.length||radius<=0)return;
+ const opacity=opts.opacity??1,geometry=new THREE.SphereGeometry(radius,28,18);
+ const material=new THREE.MeshStandardMaterial({color,metalness:.15,roughness:.4,transparent:opacity<1,opacity,depthWrite:opacity>=1,side:opts.side??THREE.FrontSide,clippingPlanes:opts.clip??null});
+ const mesh=new THREE.InstancedMesh(geometry,material,positions.length),m=new THREE.Matrix4();
+ positions.forEach((p,i)=>{const v=f.world(p);mesh.setMatrixAt(i,m.makeTranslation(v.x,v.y,v.z));});mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();mesh.name=opts.name??'';group.add(mesh);
+}
+function addTetrahedra(group:THREE.Group,f:Frame,positions:Position[],radius:number){
+ if(!positions.length)return;
+ const geometry=new THREE.TetrahedronGeometry(radius),material=new THREE.MeshStandardMaterial({color:LESSON_COLORS.tetra,transparent:true,opacity:.55,depthWrite:false,flatShading:true});
+ const mesh=new THREE.InstancedMesh(geometry,material,positions.length),m=new THREE.Matrix4();
+ positions.forEach((p,i)=>{const v=f.world(p);mesh.setMatrixAt(i,m.makeTranslation(v.x,v.y,v.z));});mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();mesh.name='tetra';group.add(mesh);
+}
+function cellEdges(group:THREE.Group,f:Frame,n:number,opacity=.55){
+ const lines:number[]=[];
+ for(let axis=0;axis<3;axis++)for(let a=0;a<=n;a++)for(let b=0;b<=n;b++){const o=[0,1,2].filter(v=>v!==axis),p=[0,0,0],q=[0,0,0];p[o[0]]=q[o[0]]=a;p[o[1]]=q[o[1]]=b;q[axis]=n;lines.push(...f.world(p as unknown as Position).toArray(),...f.world(q as unknown as Position).toArray());}
+ group.add(new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(lines,3)),new THREE.LineBasicMaterial({color:0x4f6870,transparent:true,opacity})));
+}
+/** Six planes keeping only the inside of the n³ block (world space). */
+function boxPlanes(f:Frame,n:number):THREE.Plane[]{
+ const a=f.world([0,0,0]),b=f.world([n,n,n]),min=a.clone().min(b),max=a.clone().max(b);
+ return [new THREE.Plane(new THREE.Vector3(1,0,0),-min.x),new THREE.Plane(new THREE.Vector3(-1,0,0),max.x),new THREE.Plane(new THREE.Vector3(0,1,0),-min.y),new THREE.Plane(new THREE.Vector3(0,-1,0),max.y),new THREE.Plane(new THREE.Vector3(0,0,1),-min.z),new THREE.Plane(new THREE.Vector3(0,0,-1),max.z)];
+}
+function lessonCarbon(crystal:PhaseCrystal):Position|null{
+ if(crystal.code==='G')return [.5,.5,.5];
+ if(crystal.code==='A'||crystal.code==='D')return [.5,.5,1];
+ return null;
+}
+function drawLessonCell(group:THREE.Group,crystal:PhaseCrystal,view:LessonView,f:Frame){
+ // Cementite cell is in Å: draw Fe at 0,55 Å and C at 0,39 Å so the 16 atoms stay readable (ball-and-stick, not size).
+ const n=view.repeats,R=ironRadius(crystal),iron=R!==null?R*crystal.cell[0]*f.unit:.55*f.unit;
+ const atoms=crystalImages(crystal,n),fe=atoms.filter(a=>a.element==='Fe').map(a=>a.position),c=atoms.filter(a=>a.element==='C').map(a=>a.position);
+ const feRadius=view.dim?iron*.32:iron*(view.shares?1:.46);
+ if(view.shares&&n===1){
+  // Opaque part inside the cell, translucent remainder outside: corner ⅛, edge ¼, face ½, body 1.
+  const clip=boxPlanes(f,n),byClass=new Map<SiteClass,Position[]>();
+  for(const p of fe){const k=classifySite(p);byClass.set(k,[...(byClass.get(k)??[]),p]);}
+  for(const [k,list] of byClass){addSpheres(group,f,list,LESSON_COLORS[k],feRadius,{clip,side:THREE.DoubleSide,name:'share-'+k});addSpheres(group,f,list,LESSON_COLORS[k],feRadius*1.002,{opacity:.07,name:'ghost-'+k});}
+ }else addSpheres(group,f,fe,LESSON_COLORS.corner,feRadius,{opacity:view.dim?.55:1,name:'fe'});
+ if(crystal.code==='C')addSpheres(group,f,c,LESSON_COLORS.carbon,iron*.7,{name:'c'});
+ cellEdges(group,f,n);
+ if(R===null)return;
+ // Ratios r/R are scale-free: take them from the unit-cell reference, not the Å-scaled copy.
+ const summary=interstitialSummary(phaseCrystal(crystal.code)),family=crystal.code==='G'?'FCC':'BCC',feA=R*crystal.cell[0]*f.unit;
+ if(view.holes!=='none'){
+  const octa=siteImages(OCTAHEDRAL[family],n),carbon=view.carbon?lessonCarbon(crystal):null;
+  const free=octa.filter(p=>!carbon||p.some((v,i)=>Math.abs(v-carbon[i])>1e-9));
+  addSpheres(group,f,free,LESSON_COLORS.octa,summary.find(s=>s.kind==='octa')!.ratio*feA,{opacity:.42,name:'octa'});
+  if(view.holes==='all')addTetrahedra(group,f,siteImages(TETRAHEDRAL[family],n),summary.find(s=>s.kind==='tetra')!.ratio*feA);
+ }
+ if(view.carbon){
+  const carbon=lessonCarbon(crystal);if(!carbon)return;
+  // Carbon drawn at its approximate covalent radius on the same scale as the ideal voids.
+  const cR=CARBON_RADIUS_ANGSTROM/(REFERENCE_LATTICE[crystal.code==='G'?'G':'A'].a)*crystal.cell[0]*f.unit;
+  addSpheres(group,f,[carbon],LESSON_COLORS.carbon,cR,{opacity:view.compare?1:.82,name:'c'});
+  if(view.neighbours){
+   const nb=carbonNeighbours(crystal,carbon),near=nb[0].distance;
+   const seg=(list:typeof nb,color:string,opacity:number)=>{if(!list.length)return;const g=new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(list.flatMap(p=>[...f.world(carbon).toArray(),...f.world(p.position).toArray()]),3));group.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color,transparent:true,opacity})));};
+   seg(nb.filter(p=>p.distance<near*1.01),LESSON_COLORS.near,1);seg(nb.filter(p=>p.distance>=near*1.01),LESSON_COLORS.far,.7);
+   const outside=nb.filter(p=>p.position.some(v=>v<-1e-9||v>n+1e-9)).map(p=>p.position);
+   addSpheres(group,f,outside,LESSON_COLORS.corner,feRadius,{opacity:.35,name:'neighbour-image'});
+  }
+ }
+}
+/**
+ * Draw one lesson step. Uses fixed reference geometry only; voids are the ideal hard-sphere
+ * clearance. The compare view puts γ and α on one Å scale (lattice parameters at ≈912 °C).
+ */
+export function drawAtomicLesson(group:THREE.Group,crystal:PhaseCrystal,view:LessonView):void{
+ if(view.compare){
+  const unit=.78/REFERENCE_LATTICE.G.a;
+  for(const [code,shift] of [['G',-.56],['A',.52]] as const){
+   const c=phaseCrystal(code),scaled={...c,cell:[REFERENCE_LATTICE[code].a,REFERENCE_LATTICE[code].a,REFERENCE_LATTICE[code].a] as Position};
+   drawLessonCell(group,scaled,{...view,repeats:1,neighbours:false},frame(scaled,1,unit,shift));
+  }
+  return;
+ }
+ const n=crystal.periodic?view.repeats:1;
+ // Shared-atom cells get a margin: the clipped spheres reach R beyond the cell walls.
+ drawLessonCell(group,crystal,{...view,repeats:n},frame(crystal,n,(view.shares?.92:1.18)/(Math.max(...crystal.cell)*n)));
 }

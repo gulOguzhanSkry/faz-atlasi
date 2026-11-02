@@ -20,7 +20,7 @@
     {
       "input": "src/domain/phase-atlas/crystal-structures.ts",
       "output": "kristal-yapilar.js",
-      "sha256": "e1c9a9d66970a4a181a32772ef3c02964b1ec3e1d6195305fd4d065e8e375526"
+      "sha256": "11878bef70026b77faaf210b01518a028b184718cb0bd9ab0995f075f4712e66"
     },
     {
       "input": "src/domain/phase-atlas/carbon-population.ts",
@@ -35,7 +35,12 @@
     {
       "input": "src/scripts/phase-atlas/AtomicPhaseScene.ts",
       "output": "atom.js",
-      "sha256": "69a39c9a2404bb51b7a893e126cd576001b213bd03afde1aa8ddceebe159a00e"
+      "sha256": "bd95173380a3b91d5cf41b125b799b967ff9b7f9b931058e578a6651396f055b"
+    },
+    {
+      "input": "src/domain/phase-atlas/atomic-lessons.ts",
+      "output": "atom-dersleri.js",
+      "sha256": "5f8bdd5ee4d52cc0e751b6e7fa1f681669c7a0d5ce9dde1903e67326108d648c"
     }
   ],
   "hashBasis": "UTF-8 text with LF line endings (Git text normalization)"

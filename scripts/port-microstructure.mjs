@@ -14,8 +14,9 @@ const files=[
  ['src/domain/phase-atlas/carbon-population.ts','karbon-yerlesimi.js'],
  ['src/domain/phase-atlas/coordination-polyhedron.ts','koordinasyon.js'],
  ['src/scripts/phase-atlas/AtomicPhaseScene.ts','atom.js'],
+ ['src/domain/phase-atlas/atomic-lessons.ts','atom-dersleri.js'],
 ];
-const replacements={"'./grain-volume.ts'":"'./tane-hacmi.js'","'./crystal-structures.ts'":"'./kristal-yapilar.js'","'three'":"'../vendor/three/three.module.min.js'","'../../domain/phase-atlas/crystal-structures.ts'":"'./kristal-yapilar.js'","'../../domain/phase-atlas/carbon-population.ts'":"'./karbon-yerlesimi.js'","'../../domain/phase-atlas/coordination-polyhedron.ts'":"'./koordinasyon.js'"};
+const replacements={"'./grain-volume.ts'":"'./tane-hacmi.js'","'./crystal-structures.ts'":"'./kristal-yapilar.js'","'three'":"'../vendor/three/three.module.min.js'","'../../domain/phase-atlas/crystal-structures.ts'":"'./kristal-yapilar.js'","'../../domain/phase-atlas/carbon-population.ts'":"'./karbon-yerlesimi.js'","'../../domain/phase-atlas/coordination-polyhedron.ts'":"'./koordinasyon.js'","'../../domain/phase-atlas/atomic-lessons.ts'":"'./atom-dersleri.js'"};
 const manifest=[];
 for(const [input,output] of files){
  let text=readFileSync(resolve(source,input),'utf8').replace(/\r\n/g,'\n');

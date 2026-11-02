@@ -205,6 +205,16 @@ Aşağıdaki galeri **gerçek arayüz ekranı değil**, uygulamanın ortak model
 
 Hücre tekrarını, atom boyutunu, karbonu, aday arayerleri ve komşuluk/koordinasyon çizimini inceleyebilirsin. Karbon sayısı fazın kendi karbon derişimine göre tam sayıya yuvarlanır; sınırlı hacmin temsil hatası gösterilir. Referans hücrelerin boyutları, seçili sıcaklıkta ölçülmüş bir örgü parametresi olarak sunulmaz.
 
+**Rehberli anlatım.** Atomik görünüm beş adımlı bir dersle açılır: *Kafes → Birim hücre → Arayerler → γ ile α → Serbest*. Her adım yalnız anlattığı şeyi çizer; karttaki her sayı referans geometriden veya atlasın kendi denge verisinden hesaplanır:
+
+- **Birim hücre:** paylaşılan atomlar hücreye göre kırpılır (köşe ⅛, yüz ½, iç 1); böylece *8 × ⅛ + 6 × ½ = 4 Fe* (YMK) ve *8 × ⅛ + 1 = 2 Fe* (HMK) görüntüden okunur; dolgu oranları 0,74 / 0,68.
+- **Arayerler:** oktahedral (küre) ve tetrahedral (dörtyüzlü) boşluklar ideal ölçekte, r/R = 0,414 / 0,225 (YMK) ve 0,155 / 0,291 (HMK); HMK’de C’nin neden yine oktahedral konumda durduğu (a/2’de 2 Fe, a/√2’de 4 Fe).
+- **γ ile α:** iki hücre aynı Å ölçeğinde (≈912 °C kafes parametreleri, Basinski vd. 1955) ve C atomuyla; çözünürlük sınırları atlasın değişmez noktalarından gelir (%2,05’e karşı %0,019 C).
+
+[![Rehberli atomik anlatım: birim hücre sayımı, HMK arayerleri ve γ ile α karşılaştırması](web/gorseller/atom-rehberi.webp)](web/gorseller/atom-rehberi.webp)
+
+<sub>Anlatımın arayüz ekran görüntüleri. Boşluklar ideal sert küre modelidir; karbon yarıçapı yalnız karşılaştırma için yaklaşık kovalent değerdir.</sub>
+
 ### 6. Korunan çelik ve ısıl işlem araçları
 
 Özgün projeden **63 çeliklik kütüphane ve 52 hesaplanmış alaşımlı kesit** korunur. Kalite arama, bileşim aralıkları, kullanıcı bileşimi, karbür bölgeleri, işlem pencereleri ve açıklama kartları incelenebilir. Hesaplanmış CALPHAD kesiti ile ampirik bağıntıların etiketleri ayrıdır. Alaşımlı çelik için ikili küp üzerinden yapı tahmini yapılmaz.

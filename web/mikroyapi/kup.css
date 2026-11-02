@@ -35,3 +35,25 @@
 @media(max-width:700px){.kup-dialog{width:calc(100vw - 12px);height:calc(100dvh - 12px);border-radius:12px}.kup-head{padding:12px;gap:10px}.kup-head h2{font-size:22px}.kup-head button{font-size:11px;padding:8px 10px}.kup-live{padding:8px 12px;font-size:11px}.kup-workspace{display:block;overflow:auto}.kup-controls{border-right:0;border-bottom:1px solid var(--cizgi);overflow:visible;padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.kup-controls>div:not(.kup-point){grid-column:1/-1}.kup-point{grid-column:1/-1;margin:0}.kup-controls .kup-field{margin:0}.kup-controls [data-kup-volume-controls]{display:grid;grid-template-columns:1fr 1fr;gap:10px}.kup-axis{margin:0}.kup-playback{margin:0}.kup-playback .kup-field{margin-bottom:8px}.kup-legend{display:none}.kup-stage{overflow:visible;padding:12px}.kup-viewport{height:300px}.kup-foot{padding:8px 12px}.kup-dock{width:104px;left:8px;bottom:8px}.kup-dock-preview{width:100px;height:90px}}
 @media(prefers-reduced-motion:no-preference){.kup-dock-preview svg{animation:kup-drift 5s ease-in-out infinite}@keyframes kup-drift{50%{transform:translateY(-5px)}}}
 @media(max-width:700px){.kup-dock{width:132px}.kup-dock-preview{width:124px;height:112px}}
+/* Guided atomic lesson */
+.kup-lesson-steps{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 14px}
+.kup-lesson-steps button{flex:1 1 auto;min-height:36px;padding:6px 8px;font-size:11px;border:1px solid var(--cizgi);background:var(--yuzey);color:var(--metin);border-radius:5px;white-space:nowrap}
+.kup-lesson-steps button[aria-pressed=true]{background:var(--metin);color:var(--bg);border-color:var(--metin)}
+.kup-dialog:has([data-kup-scale] option[value=atomic]:checked) .kup-stage:has(.kup-lesson-card:not([hidden])){grid-template-columns:minmax(0,1fr) minmax(280px,360px)}
+.kup-lesson-card{min-width:0;min-height:0;overflow:auto;border-left:1px solid var(--cizgi);padding:2px 2px 2px 18px;font-size:13px;line-height:1.6}
+.kup-lesson-card h3{font-size:20px;line-height:1.25;margin:6px 0 10px}
+.kup-lesson-body{color:var(--metin);margin:10px 0}
+.kup-badges{display:flex;flex-wrap:wrap;gap:6px}
+.kup-badge{font:600 10px ui-monospace,monospace;letter-spacing:.03em;padding:3px 7px;border:1px solid var(--cizgi);border-radius:20px;color:var(--soluk)}
+.kup-badge-calculated{border-color:var(--vurgu);color:var(--vurgu)}
+.kup-facts{display:grid;gap:8px;border-top:1px solid var(--cizgi);padding-top:12px;color:var(--soluk)}
+.kup-formula{font:600 13px/1.5 ui-monospace,monospace;color:var(--metin)}
+.kup-lesson-chip{display:flex;align-items:center;gap:8px;font-size:12px}
+.kup-lesson-chip i{width:12px;height:12px;border-radius:50%;flex:0 0 auto;border:1px solid #0003}
+.kup-compare{width:100%;border-collapse:collapse;font-size:12px}
+.kup-compare th,.kup-compare td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--cizgi);vertical-align:top}
+.kup-compare td{font:600 12px ui-monospace,monospace;color:var(--metin);white-space:nowrap}
+.kup-conclusion{color:var(--metin);font-weight:600}
+.kup-lesson-nav{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
+.kup-lesson-nav button{min-height:40px;padding:8px 12px}
+@media(max-width:900px){.kup-dialog:has([data-kup-scale] option[value=atomic]:checked) .kup-stage:has(.kup-lesson-card:not([hidden])){grid-template-columns:1fr}.kup-lesson-card{border-left:0;border-top:1px solid var(--cizgi);padding:14px 0 0}}

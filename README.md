@@ -205,6 +205,16 @@ Above the eutectoid, or while residual γ remains, etched mode falls back to pha
 
 Inspect cell repetitions, atom size, carbon, candidate interstitials and neighbour/coordination geometry. Carbon populations are rounded to integers using the phase's own carbon concentration, with the finite-volume representation error disclosed. Reference cell dimensions are not presented as lattice parameters measured at the selected temperature.
 
+**Guided lesson.** The atomic view opens as a five-step lesson: *Lattice → Unit cell → Interstices → γ vs α → Free*. Each step draws only what it explains, and every number on the card is computed from the reference geometry or the atlas' own equilibrium data:
+
+- **Unit cell:** shared atoms are clipped to the cell (corner ⅛, face ½, body 1), so *8 × ⅛ + 6 × ½ = 4 Fe* (FCC) and *8 × ⅛ + 1 = 2 Fe* (BCC) can be read off the picture; packing fractions 0.74 / 0.68.
+- **Interstices:** octahedral (spheres) and tetrahedral (tetrahedra) voids to ideal scale, r/R = 0.414 / 0.225 (FCC) and 0.155 / 0.291 (BCC); in BCC, why C still sits on the octahedral site (2 Fe at a/2, 4 at a/√2).
+- **γ vs α:** both cells on one Å scale (lattice parameters at ≈912 °C, Basinski et al. 1955) with the C atom; the solubility limits come from this atlas' invariants (2.05 vs 0.019 wt% C).
+
+[![Guided atomic lesson: unit-cell counting, BCC interstices and the γ vs α comparison](web/gorseller/atom-rehberi-en.webp)](web/gorseller/atom-rehberi-en.webp)
+
+<sub>Interface screenshots of the lesson. Voids follow the ideal hard-sphere model; the carbon radius is an approximate covalent value for comparison only.</sub>
+
 ### 6. Retained steel and heat-treatment tools
 
 The original **63-grade steel library and 52 calculated alloy isopleths** remain available. Explore grade search, composition ranges, custom compositions, carbide fields, process windows and information cards. Calculated CALPHAD sections and empirical estimates have separate labels. The binary cube is not used to predict alloy-steel microstructure.

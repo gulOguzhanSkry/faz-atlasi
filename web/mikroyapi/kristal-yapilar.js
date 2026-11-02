@@ -229,10 +229,110 @@ function carbonNeighbours(crystal, carbon) {
   }
   return candidates.sort((a, b) => a.distance - b.distance).slice(0, 6);
 }
+const TETRAHEDRAL = {
+  FCC: [[0.25, 0.25, 0.25], [0.75, 0.25, 0.25], [0.25, 0.75, 0.25], [0.25, 0.25, 0.75], [0.75, 0.75, 0.25], [0.75, 0.25, 0.75], [0.25, 0.75, 0.75], [0.75, 0.75, 0.75]],
+  BCC: [[0, 0.5, 0.25], [0, 0.5, 0.75], [0, 0.25, 0.5], [0, 0.75, 0.5], [0.5, 0, 0.25], [0.5, 0, 0.75], [0.25, 0, 0.5], [0.75, 0, 0.5], [0.5, 0.25, 0], [0.5, 0.75, 0], [0.25, 0.5, 0], [0.75, 0.5, 0]]
+};
+const SHARE = { corner: 1 / 8, edge: 1 / 4, face: 1 / 2, body: 1 };
+const onWall = (v) => Math.abs(v) < 1e-9 || Math.abs(v - 1) < 1e-9;
+function classifySite(p) {
+  const n = p.filter(onWall).length;
+  return n === 3 ? "corner" : n === 2 ? "edge" : n === 1 ? "face" : "body";
+}
+function siteShare(p) {
+  return SHARE[classifySite(p)];
+}
+function cellShareCount(crystal) {
+  if (!crystal.periodic) return [];
+  const images = crystalImages(crystal, 1);
+  return ["Fe", "C"].map((element) => {
+    const byClass = { corner: 0, edge: 0, face: 0, body: 0 };
+    for (const atom of images) if (atom.element === element) byClass[classifySite(atom.position)]++;
+    const total = Object.keys(byClass).reduce((s, k) => s + byClass[k] * SHARE[k], 0);
+    return { element, byClass, total };
+  }).filter((row) => row.total > 0);
+}
+function cubicFamily(crystal) {
+  return crystal.code === "G" ? "FCC" : crystal.code === "A" || crystal.code === "D" ? "BCC" : null;
+}
+function ironRadius(crystal) {
+  const f = cubicFamily(crystal);
+  return f === "FCC" ? Math.SQRT2 / 4 : f === "BCC" ? Math.sqrt(3) / 4 : null;
+}
+function packingFraction(crystal) {
+  const R = ironRadius(crystal);
+  if (R === null) return null;
+  const fe = cellShareCount(crystal).find((r) => r.element === "Fe").total;
+  return fe * 4 / 3 * Math.PI * R ** 3 / (crystal.cell[0] * crystal.cell[1] * crystal.cell[2]);
+}
+function ironDistances(crystal, p) {
+  const out = [];
+  const o = p.map(Math.floor);
+  for (const atom of crystal.atoms) if (atom.element === "Fe") for (let x = o[0] - 1; x <= o[0] + 1; x++) for (let y = o[1] - 1; y <= o[1] + 1; y++) for (let z = o[2] - 1; z <= o[2] + 1; z++) {
+    const d = Math.sqrt([atom.position[0] + x, atom.position[1] + y, atom.position[2] + z].reduce((s, v, i) => s + ((v - p[i]) * crystal.cell[i]) ** 2, 0));
+    if (d > 1e-9) out.push(d);
+  }
+  return out.sort((a, b) => a - b);
+}
+function coordinationNumber(crystal) {
+  if (!crystal.periodic || cubicFamily(crystal) === null) return null;
+  const fe = crystal.atoms.find((a) => a.element === "Fe").position, d = ironDistances(crystal, fe);
+  return d.filter((v) => v < d[0] * (1 + 1e-6)).length;
+}
+function interstitialSites(crystal) {
+  const f = cubicFamily(crystal), R = ironRadius(crystal);
+  if (!f || R === null) return [];
+  const out = [];
+  for (const [kind, list, neighbours] of [["octa", OCTAHEDRAL[f], 6], ["tetra", TETRAHEDRAL[f], 4]]) for (const position of list) {
+    const nearest = ironDistances(crystal, position)[0];
+    out.push({ kind, position, neighbours, ratio: (nearest - R) / R, nearest });
+  }
+  return out;
+}
+function interstitialSummary(crystal) {
+  const sites = interstitialSites(crystal);
+  return ["octa", "tetra"].map((kind) => {
+    const s = sites.filter((x) => x.kind === kind);
+    return { kind, perCell: s.length, ratio: s[0]?.ratio ?? NaN, neighbours: s[0]?.neighbours ?? 0 };
+  }).filter((x) => x.perCell > 0);
+}
+function siteImages(positions, n = 1) {
+  const out = [];
+  for (let x = 0; x < n; x++) for (let y = 0; y < n; y++) for (let z = 0; z < n; z++) for (const p of positions) {
+    const q = [p[0] + x, p[1] + y, p[2] + z];
+    for (const a of Math.abs(q[0]) < 1e-9 ? [0, n] : [q[0]]) for (const b of Math.abs(q[1]) < 1e-9 ? [0, n] : [q[1]]) for (const c of Math.abs(q[2]) < 1e-9 ? [0, n] : [q[2]]) out.push([a, b, c]);
+  }
+  const seen = /* @__PURE__ */ new Set();
+  return out.filter((p) => {
+    const k = p.map((v) => v.toFixed(6)).join();
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+}
+const REFERENCE_LATTICE = { A: { a: 2.904, temperature: 912 }, G: { a: 3.647, temperature: 912 } };
+const CARBON_RADIUS_ANGSTROM = 0.77;
+function radiiAngstrom(code) {
+  const crystal = phaseCrystal(code), { a, temperature } = REFERENCE_LATTICE[code], R = ironRadius(crystal) * a, s = interstitialSummary(crystal);
+  return { a, temperature, iron: R, octa: s.find((x) => x.kind === "octa").ratio * R, tetra: s.find((x) => x.kind === "tetra").ratio * R };
+}
 export {
+  CARBON_RADIUS_ANGSTROM,
   OCTAHEDRAL,
+  REFERENCE_LATTICE,
+  TETRAHEDRAL,
   carbonNeighbours,
+  cellShareCount,
+  classifySite,
+  coordinationNumber,
   crystalImages,
   exampleCarbon,
-  phaseCrystal
+  interstitialSites,
+  interstitialSummary,
+  ironRadius,
+  packingFraction,
+  phaseCrystal,
+  radiiAngstrom,
+  siteImages,
+  siteShare
 };
