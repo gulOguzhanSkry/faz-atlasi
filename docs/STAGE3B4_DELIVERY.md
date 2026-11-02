@@ -109,3 +109,31 @@ Reference context (not image assets embedded into the app):
 
 Independent code tests and actual browser acceptance are recorded by the
 independent acceptance agent / main integrator, separately from this delivery.
+
+## README gallery — maximum detail
+
+The README landing pages now use eight source-calculated states, including the
+source's exact eutectoid/eutectic **compositions** at 650 °C and eutectic
+composition at 900 °C. Each volume uses the `maximum` quality configuration:
+384 deterministic grains, seed 20261101 and 512 × 512 pixels per face. Every
+cementite percentage printed below a cube comes from that state's actual source
+phase mass budget; it is not inferred from its visible area or a textbook rule.
+
+- `web/gorseller/readme-microstructures.webp` / `-en.webp`: eight phase-colour
+  cubes with composition, temperature and cementite mass percentage.
+- `web/gorseller/readme-display-modes.webp` / `-en.webp`: the same samples as
+  phase cubes, constituent cubes and etched sections. The hot state uses the
+  documented phase-colour fallback rather than an invented hot Nital appearance.
+- `web/gorseller/readme-microstructures.manifest.json`: quality, grain count,
+  seed, face resolution, source invariants and every phase/constituent budget.
+
+These are explicitly labelled offline schematic renders of the runtime model.
+They are **not** application UI screenshots. No screenshot-like fake window,
+toolbar or control panel has been drawn around them.
+
+Reproduce:
+
+```sh
+node hesap/animasyon/readme-galerisi.mjs
+python hesap/animasyon/readme-galerisi.py
+```

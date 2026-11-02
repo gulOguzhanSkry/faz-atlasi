@@ -33,3 +33,18 @@ test('both language intro assets and the requested contact sheet are nonempty na
  assert.equal(sheet.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.ok(sheet.readUInt32BE(16)>1000);assert.ok(sheet.readUInt32BE(20)>1000);
  assert.ok(statSync(asset('kesit-paftasi.png')).size>100000);
 });
+
+test('all eight maximum-detail README gallery cases retain actual source phase, constituent and cementite mass budgets',()=>{
+ const gallery=JSON.parse(readFileSync(asset('readme-microstructures.manifest.json'),'utf8')),engine=motor();
+ assert.equal(gallery.quality,'maximum');assert.equal(gallery.grains,384);assert.equal(gallery.resolution,512);assert.equal(gallery.seed,20261101);
+ assert.equal(gallery.cases.length,8);assert.deepEqual(gallery.invariants,data.invariants);assert.match(gallery.scope,/not UI screenshots or measured micrographs/);
+ const expected=[.2,.45,data.invariants.otektoid.G,1.2,3,data.invariants.otektik.L,5,data.invariants.otektik.L];
+ gallery.cases.forEach((item,i)=>{
+  assert.equal(item.carbon,expected[i]);assert.equal(item.temperature,i===7?900:650);
+  const result=engine.calculate(item.carbon,item.temperature);assert.equal(result.status,'resolved');
+  assert.equal(JSON.stringify(item.phases),JSON.stringify(result.phases));
+  assert.deepEqual(item.parts,JSON.parse(JSON.stringify(result.parts.map(p=>({id:p.id,fraction:p.fraction})))));
+  assert.equal(item.thetaMassFraction,result.phases.find(p=>p.f==='C')?.oran??0);
+  assert.ok(Math.abs(item.phases.reduce((s,p)=>s+p.oran*p.w,0)-item.carbon)<1e-8);
+ });
+});

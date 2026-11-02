@@ -1,177 +1,102 @@
-# Faz Atlası — equilibrium phases and 3D microstructures
+<div align="center">
 
-**OG fork** · [Open this fork](https://guloguzhanskry.github.io/faz-atlasi/?lang=en) · [Türkçe](README.tr.md) · [Original project by acarcemal](https://github.com/acarcemal/faz-atlasi)
+<sub>OG FORK · INTERACTIVE MATERIALS EDUCATION</sub>
 
-[![Source-calculated slow-cooling example: 3D grain volume and its section](web/gorseller/mikroyapi-sogume-en-poster.webp)](https://guloguzhanskry.github.io/faz-atlasi/?lang=en)
+# Faz Atlası
 
-[Watch the 12-second introduction](https://guloguzhanskry.github.io/faz-atlasi/gorseller/mikroyapi-sogume-en.mp4) · [Explore the section comparison sheet](web/gorseller/kesit-paftasi.png)
+### From the phase diagram to the microstructure.
 
-Choose carbon and temperature on the diagram, inspect the phase and constituent mass budgets, then open the 3D cube. Cut the same volume in any direction, compare an illustrative etched view, or inspect an atomic reference cell. Every appearance uses an explicit scope: **schematic, unscaled, not a measured micrograph or kinetic prediction**.
+Explore Fe–C equilibrium, follow the constituent budgets,<br>
+and look inside the same structure — from a 3D section to an atomic reference.
 
-The original Fe–Fe₃C CALPHAD calculation, alloy-steel library and licences are retained. New features, source comparison and independent test limitations are documented in [OG additions](docs/OG_ADDITIONS.md), [3D delivery](docs/STAGE3_DELIVERY.md), [section and animation delivery](docs/STAGE3B4_DELIVERY.md), and [trace comparison](hesap/rapor/og/TRACE_COMPARISON.md).
+[![Release v1.2.1](https://img.shields.io/badge/release-v1.2.1-526e60?style=flat-square)](https://github.com/gulOguzhanSkry/faz-atlasi/releases/tag/v1.2.1)
+[![Code licence MIT](https://img.shields.io/badge/code-MIT-a77850?style=flat-square)](LICENSE)
+![Languages TR and EN](https://img.shields.io/badge/languages-TR%20%2F%20EN-657f99?style=flat-square)
+![Schematic research prototype](https://img.shields.io/badge/model-schematic%20prototype-85719c?style=flat-square)
 
-## Original project
+**[Open the atlas ↗](https://guloguzhanskry.github.io/faz-atlasi/?lang=en)** &nbsp; · &nbsp;
+[Türkçe](README.tr.md) &nbsp; · &nbsp;
+[Watch the introduction](https://guloguzhanskry.github.io/faz-atlasi/gorseller/mikroyapi-sogume-en.mp4)
 
-**English** · [Türkçe](README.tr.md) · [Open the app](https://acarcemal.github.io/faz-atlasi/?lang=en)
+[![Eight source-calculated Fe–C microstructures at maximum 384-grain detail, with their cementite mass fractions](web/gorseller/readme-microstructures-en.webp)](web/gorseller/readme-microstructures-en.webp)
 
-The Fe–C diagram is used every day in foundries, heat-treatment shops, welding and the classroom — yet it is still mostly
-read off a printed page with a ruler. Free online tools usually move an arrow over a static image, while software that actually
-calculates phase equilibria (Thermo-Calc, JMatPro) is expensive. **Faz Atlası** ("phase atlas" in Turkish) tries to fill that gap.
+<sub>384 grains · 512² textures · eight source-calculated states · offline schematic renders, not UI screenshots or measured micrographs</sub>
 
-**No images are used.** Every boundary is drawn from a thermodynamic equilibrium calculation (the CALPHAD method). The app is a
-single web page in English and Turkish (**TR | EN** switch, top right), needs no installation and also works offline.
+</div>
 
-![Heat-treatment mode: calculated isopleth of 42CrMo4 with heat-treatment windows and a pinned point](gorseller/1-kesit-42CrMo4-en.png)
+---
 
-| Fe–C diagram | Built-in explanations | On a phone |
-|---|---|---|
-| ![Fe–C diagram with a tie-line and lever rule in the α+γ field](gorseller/2-fe-c-diyagrami-en.png) | ![Info window on heat-treatment temperatures](gorseller/3-bilgi-penceresi-en.png) | ![Phone layout](gorseller/4-telefon-en.png) |
+## One point. Three ways to understand it.
 
-## Features
+| **01 / Equilibrium** | **02 / Microstructure** | **03 / Atomic reference** |
+| :--- | :--- | :--- |
+| Select carbon and temperature on the calculated Fe–Fe₃C diagram. Read the phases, their carbon contents and mass fractions. | Separate pearlite, primary/secondary cementite and ledeburite ancestry. Cut the shared 3D volume and compare its appearances. | Inspect FCC austenite, BCC ferrite and cementite reference cells. Explore illustrative interstitial carbon positions. |
 
-**Phase diagram**
-- Calculated metastable Fe–Fe₃C diagram, 400–1600 °C.
-- Pick a carbon content and temperature to see the phases present, their fractions from the lever rule and the carbon content of each phase.
-- Critical temperatures for that carbon content (A1, A3, Acm, solidus, liquidus) and all field boundaries along the selected isotherm.
-- Microstructure after slow cooling (proeutectoid phase, pearlite, ledeburite fractions).
-- Pin points (Shift + click) and hover over them to compare.
+**Try a complete path in four steps:** choose **0.45 wt% C**, move below the eutectoid, open **3D microstructure**, then switch the section from **phase colours** to **etched appearance**. At an exact invariant, select the reaction progress **ξ** to resolve the otherwise non-unique phase amounts.
 
-**Heat treatment & alloys**
-- Searchable library of 63 low-alloy steels: EN/ISO grade and number, AISI/SAE equivalent, standard composition ranges.
-  You can enter and save your own compositions.
-- **Calculated isopleths:** the vertical section of the selected steel, with alloy carbides (M₇C₃, M₂₃C₆, M₆C, MC) and three- and
-  four-phase fields — showing A1 as a band and the temperature at which each carbide dissolves.
-- Full annealing / hardening, normalizing, spheroidizing and stress-relieving windows drawn on the diagram.
-- Expected structure for each quench medium, Ms, retained austenite, as-quenched hardness and hardenability (D<sub>I</sub>).
-- Every card has an info window (i) that explains the underlying metallurgy.
+## What this fork adds
 
-## Try it
+- **Inspectable constituent budgets** — source-derived invariant compositions, per-constituent phase breakdowns and lever-rule calculations.
+- **A second reading layer on the diagram** — P/S/E/C composition references and selectable slow-cooling constituent regions, distinct from phase boundaries.
+- **A reusable 3D inspector** — floating dock, retained camera and selection, section planes, phase/constituent/grain colours, and an atomic reference view.
+- **A shared 2D section** — the cube's own label map, relative magnification, illustrative Nital appearance, deterministic optical effects and annotated PNG export.
+- **A reproducible introduction** — a short cooling sequence generated from the same source calculation and geometry, in both interface languages.
 
-- **Online:** [acarcemal.github.io/faz-atlasi](https://acarcemal.github.io/faz-atlasi/?lang=en) — nothing to install, works on phones too.
-- **Locally:** open `web/index.html` in a browser (double-click is enough; no server or internet needed), or serve it:
+The original project already includes slow-cooling constituent estimates. This fork extends their explanation, source-state connection and visual exploration; it does not claim to have introduced those concepts.
 
-```bash
+### A wide workspace on a small screen
+
+The mobile diagram keeps its working area instead of shrinking the plot to an unreadable thumbnail. Switch between **Pan** and **Select point**; drag to pan and pinch to zoom. **Lock view** keeps the framing still while you inspect a point. Zoom buttons, directional controls, **1:1 view** and **Fit diagram** provide explicit alternatives to gestures. Composition and temperature inputs remain outside the transformed diagram. The desktop layout stays unchanged.
+
+<details>
+<summary><strong>Explore the visual and technical evidence</strong></summary>
+
+| Review | Contents |
+| :--- | :--- |
+| [Same volume, three displays](web/gorseller/readme-display-modes-en.webp) | Maximum-detail phase cubes, constituent cubes and etched sections from eight computed states. |
+| [Section comparison sheet](web/gorseller/kesit-paftasi.png) | Seven compositions, three appearances and three relative magnifications. |
+| [Independent acceptance](docs/INDEPENDENT_ACCEPTANCE.md) | Conservation, invariant progress, geometry, shared-section identities and remaining acceptance limits. |
+| [3D inspector](docs/STAGE3_DELIVERY.md) · [Section and animation](docs/STAGE3B4_DELIVERY.md) | Architecture, controls, reproducible assets and explicitly stated scope. |
+| [Source-trace comparison](hesap/rapor/og/TRACE_COMPARISON.md) | Why the shipped phase data was retained rather than silently replaced. |
+| [Portfolio integration](docs/PORTFOLIO_INTEGRATION.md) | A pinned calculation source shared with the OG portfolio. |
+
+</details>
+
+## Read the model correctly
+
+> **Equilibrium fractions are calculated. The spatial arrangement is schematic.**
+
+The binary reference is **metastable Fe–Fe₃C**, 400–1600 °C, approximately 1 bar. Constituent ancestry assumes slow cooling from liquid, even when a point is reached by moving upward in temperature. Pearlite and ledeburite are microconstituents, not extra thermodynamic phases.
+
+The model does not predict cooling kinetics, physical grain size, lamellar spacing, graphite, bainite or martensite. A section's area fraction is not forced to equal bulk mass or volume fraction; atom cells are reference illustrations. Alloy isopleths remain available in the original atlas, while the new binary microstructure layer is disabled for alloy states. Numerical conservation is not independent experimental validation. [Scope and methods →](docs/OG_ADDITIONS.md)
+
+## Run it locally
+
+Download or clone the repository, then serve its self-contained `web/` folder:
+
+```sh
 python -m http.server 8731 --directory web
 ```
 
-## Is it safe to run?
+Open **[localhost:8731](http://localhost:8731/?lang=en)**. No runtime build, CDN or account is required. Once the files are local, the app works without an internet connection. A local HTTP server is needed for the lazy-loaded 3D ES modules; opening an HTML file directly is not the full-featured path.
 
-Yes. Faz Atlası is just a web page:
+For development and automated checks only:
 
-- **No installation:** there is no `.exe` or anything to run. The `web/` folder contains only HTML, CSS, JavaScript and data files.
-- **Sends nothing anywhere:** no analytics, cookies, ads or external requests; it works offline. Saved steels and pinned points
-  stay in your own browser (localStorage).
-- **Runs in the browser sandbox:** it cannot access your files or other programs.
-- **You can verify it:** this command finds every network call in the web code. The only matches are the SVG namespace
-  (`http://www.w3.org/2000/svg`) and the page's own address in the link-preview `<meta>` tags — neither is a request.
-
-  ```bash
-  grep -rnE "fetch\(|XMLHttpRequest|WebSocket|sendBeacon|https?://|eval\(" web --include=*.js --include=*.html
-  ```
-
-The Python scripts in `hesap/` are only needed to recalculate the data, not to use the app.
-
-## How it is calculated
-
-| Part | Method | Data / reference |
-|---|---|---|
-| Binary Fe–C diagram | Gibbs energy minimization with pycalphad | Fei & Brosh (2014), `cfe_broshe.tdb` |
-| Alloy steel isopleths | pycalphad; alloy content fixed, 0–1.8 wt% C, 550–1100 °C | MatCalc open steel database mc_fe v2.062 (TU Wien) |
-| Alloy shift of critical temperatures (compositions without an isopleth) | Calculated binary curves + alloy coefficients | Andrews (1965); eutectoid carbon shift from Bain |
-| Ms, retained austenite | Empirical relations | Andrews (1965), Koistinen & Marburger (1959) |
-| As-quenched hardness, hardenability | Empirical relations | Hodge & Orehoski (1946), ASTM A255 |
-
-### Binary Fe–C: calculation vs. textbook values
-
-| Point | Textbook | Calculated |
-|---|---|---|
-| Eutectoid | 727 °C, 0.76% C | 726.5 °C, 0.762% C |
-| Eutectic | 1147 °C, 4.3% C | 1148.2 °C, 4.38% C (max. C in γ: 2.05%) |
-| Peritectic | 1495 °C | 1494.6 °C |
-| Pure Fe α→γ / γ→δ / melting | 912 / 1394 / 1538 °C | 911.6 / 1394.3 / 1537.8 °C |
-
-The textbook values of 2.14% and 4.3% come from older experimental compilations; the calculation is based on a current
-thermodynamic assessment.
-
-### Alloy steels: calculation vs. literature
-
-Calculated values are equilibrium (Ae) temperatures; measured Ac values are a few degrees higher because of the heating rate.
-
-| Steel | Calculated | Literature (measured) | Empirical formulas only |
-|---|---|---|---|
-| C45 (1045) | Ae1 717 / Ae3 771 °C | Ac1 ~725 / Ac3 ~780 °C | 727 / 767 °C |
-| 42CrMo4 (4140) | Ae1 727 / Ae3 771 °C | Ac1 ~730–745 / Ac3 ~780–790 °C | 744 / 766 °C |
-| 16MnCr5 (5115) | Ae1 713 / Ae3 815 °C | Ac1 ~730–740 / Ac3 ~830 °C | — |
-| 100Cr6 (52100) | Ae1 736 / Aecm 889 °C | Ac1 ~745 / Accm ~890–900 °C | 755 / 958 °C |
-
-## Limitations
-
-- All diagram values are **equilibrium** values; real heating and cooling deviate depending on rate.
-- Stainless and high-alloy tool steels (sigma and Laves phases; N, Nb, Ti, Al, B) are not covered yet.
-- Predicted cooling structures are rough guides; use the steel's CCT diagram and supplier data for definitive results.
-- Faz Atlası is intended for education and preliminary design. Temperatures used in production must be confirmed against the mill
-  certificate and supplier data.
-
-## Recalculating the data
-
-The web app ships with precalculated data; the steps below are only needed to recalculate it or to add steels to the library.
-
-```bash
-python -m venv .venv
-.venv/Scripts/python -m pip install pycalphad==0.11.2
-
-# Binary Fe–C diagram -> web/veri/fe_c.js (~3 min)
-.venv/Scripts/python hesap/diyagram_uret.py
-
-# Adapt the MatCalc database for pycalphad (download mc_fe_v2062.tdb from matcalc.at)
-.venv/Scripts/python hesap/tdb_temizle.py hesap/tdb/mc_fe_v2062.tdb hesap/tdb/mc_fe_pycalphad.tdb
-.venv/Scripts/python hesap/celik_dogrula.py
-
-# Steel library and isopleths (already calculated isopleths are skipped)
-.venv/Scripts/python hesap/celik_kutuphanesi.py
-KESIT_ISLEMCI=4 .venv/Scripts/python hesap/kesit_uret.py
+```sh
+npm ci --ignore-scripts
+npm test
 ```
 
-`KESIT_ISLEMCI` is the number of parallel worker processes; each uses 1–1.5 GB of RAM. Steels with the same alloy content share one
-isopleth (63 steels → 52 isopleths). To add a steel, add one line to `hesap/celik_kutuphanesi.py` and run the last two commands.
+Optional numerical research tools are documented in [hesap/og](hesap/og/README.md). Their outputs stay separate from the deployed dataset.
 
-The MatCalc file does not load in pycalphad as is. `tdb_temizle.py` removes MatCalc-specific commands and kinetic parameters, fixes a
-few typos in the source file (a missing `!`, `6000.00.00`, malformed reference tags) and filters out elements not used for steels.
+## Built on an openly credited foundation
 
-The code and file names are in Turkish; the comments in each file explain what it does.
+**Original Faz Atlası:** [acarcemal](https://github.com/acarcemal/faz-atlasi) — the calculated diagram, steel library, alloy isopleths and original interface. **Fork additions:** Oğuzhan Gül / OG — constituent-state integration, diagram layer, shared 3D/2D inspector and research/integration tooling. The [original documentation](https://github.com/acarcemal/faz-atlasi/tree/e9b2fce0b604502b94e620104fa6533e1e78bd82) contains the upstream feature and calculation details.
 
-## Files
+- **CALPHAD:** pycalphad, R. Otis and Z.-K. Liu; binary assessment by Fei & Brosh (2014), `cfe_broshe.tdb`.
+- **Alloy data:** MatCalc `mc_fe v2.062`, E. Povoden-Karadeniz and A. Jacob, TU Wien. Derived isopleth data carries the [ODbL 1.0 notice](NOTICE).
+- **Metallurgical interpretation:** [Bhadeshia, steel microstructures](https://www.phase-trans.msm.cam.ac.uk/2008/Steel_Microstructure/SM.html) and [Yescas-Gonzalez & Bhadeshia, cast irons](https://www.phase-trans.msm.cam.ac.uk/2001/adi/cast.iron.html).
 
-| File | Purpose |
-|---|---|
-| `web/index.html`, `web/style.css` | Page and design |
-| `web/app.js` | Diagram drawing, point selection, binary Fe–C panel |
-| `web/detay.js` | Heat-treatment mode: steel library, alloying, windows, cooling |
-| `web/kesit.js` | Alloy steel isopleths (calculated) |
-| `web/pin.js` | Pinned points and their cards |
-| `web/bilgi.js`, `web/bilgi_en.js` | Info windows (TR / EN), card collapsing |
-| `web/dil.js`, `web/dil_sec.js` | Language system: all interface text (TR / EN), TR \| EN switch |
-| `hesap/diyagram_uret.py` | Binary Fe–C data |
-| `hesap/celik_kutuphanesi.py` | Steel library (single source) |
-| `hesap/tdb_temizle.py`, `celik_dogrula.py`, `kesit_uret.py` | MatCalc database preparation, validation, isopleth generation |
-| `hesap/gorsel_uret.ps1`, `gorsel_senaryo.js` | Generates the README / sharing screenshots (TR + EN) |
+Code is **[MIT licensed](LICENSE)**; data terms remain distinct. Original author and third-party notices are preserved. See [NOTICE](NOTICE), the vendored Three.js licence and [the atomic-source notes](docs/STAGE3_DELIVERY.md) for attribution.
 
-## Credits and licenses
-
-- **pycalphad** — R. Otis & Z.-K. Liu, *J. Open Res. Softw.* 5 (2017) 1. MIT license.
-- **Fe–C database** — Fei & Brosh (2014), `cfe_broshe.tdb`, shipped with pycalphad.
-- **MatCalc mc_fe v2.062** — E. Povoden-Karadeniz, A. Jacob, TU Wien. Published under the
-  [Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/1-0/). The alloy steel isopleths in this project are produced
-  from this database. If the adapted database file (`mc_fe_pycalphad.tdb`) is shared, it must be shared under the same license with this
-  attribution.
-- Steel composition ranges are the heat-analysis ranges from the relevant EN/ISO standards.
-
-Faz Atlası code is released under the [MIT License](LICENSE); the data notice for the isopleths is in [NOTICE](NOTICE).
-# Additions in this fork
-
-This is Oğuzhan Gül's fork of [Faz Atlası by acarcemal](https://github.com/acarcemal/faz-atlasi). The original CALPHAD data, author attribution, MIT licence and data notices remain intact.
-
-The new **microstructure constituents** panel partitions the source solver's phase masses along an explicitly assumed slow, metastable Fe–Fe₃C cooling path. It includes pearlite, primary/secondary/tertiary cementite and ledeburite ancestry, an inspectable calculation, and explicit ξ progress at exact invariant temperatures. It is bilingual, works offline and requires no build step. It does not predict kinetics, graphite-bearing equilibrium or the actual morphology of a processed part. Development tests run with `npm ci && npm test`; these tools are not needed to use `web/index.html`.
-
-See [the implementation and acceptance notes](docs/OG_ADDITIONS.md).
-
+<div align="center"><sub>Built to make the calculation visible — and its limits readable.</sub></div>

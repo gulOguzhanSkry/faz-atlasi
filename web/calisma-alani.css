@@ -1,0 +1,22 @@
+/* SPDX-License-Identifier: MIT — bounded mobile viewport, unbounded panning. */
+.ca-workspace,.ca-viewport,.ca-stage{display:contents}.ca-tools,.ca-help,.ca-pan-shield{display:none}
+@media(max-width:900px){
+ .ca-workspace.ca-active{display:block;min-width:0;width:100%;overflow:hidden;border:1px solid var(--cizgi);border-radius:9px;background:var(--yuzey)}
+ .ca-active .ca-tools{display:flex;flex-wrap:wrap;gap:7px;padding:9px;border-bottom:1px solid var(--cizgi);background:var(--yuzey);position:relative;z-index:2;min-width:0}
+ .ca-tools button{min-height:42px;padding:8px 10px;font-size:11px;line-height:1.25;white-space:normal;touch-action:manipulation}
+ .ca-mode,.ca-actions,.ca-arrows{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+ .ca-mode{flex-basis:100%}.ca-mode button[aria-pressed=true]{background:var(--vurgu);border-color:var(--vurgu);color:var(--yuzey)}
+ .ca-actions output{font:11px ui-monospace,monospace;min-width:40px;text-align:center;color:var(--soluk)}
+ .ca-arrows{margin-left:auto}.ca-arrows button{min-width:34px;padding-inline:8px}
+ .ca-active .ca-viewport{display:block;position:relative;height:min(72dvh,620px);min-height:340px;width:100%;overflow:hidden;isolation:isolate;background-color:var(--yuzey-2);background-image:radial-gradient(var(--cizgi) .8px,transparent .8px);background-size:18px 18px;overscroll-behavior:contain;outline-offset:-3px}
+ .ca-active .ca-stage{display:block;position:absolute;left:0;top:0;width:1120px;height:720px;transform-origin:0 0;will-change:transform}
+ .ca-active .ca-stage #cizim{display:block;position:relative;width:1120px!important;height:720px!important;min-width:1120px!important;min-height:720px!important;flex:none!important;background:var(--yuzey);touch-action:none}
+ .ca-active .ca-pan-shield{display:block;position:absolute;inset:0;z-index:1;cursor:grab;touch-action:none}
+ .ca-active .ca-pan-shield:active{cursor:grabbing}
+ .ca-active[data-mode=select] .ca-pan-shield{pointer-events:none}
+ .ca-active[data-locked=true] .ca-pan-shield{cursor:default;touch-action:pan-y}
+ .ca-active .ca-help{display:block;padding:10px 12px;margin:0;font-size:11px;line-height:1.6;color:var(--soluk);border-top:1px solid var(--cizgi)}
+ .ca-active :focus-visible{outline:2px solid var(--vurgu);outline-offset:2px}
+ .ca-active .ca-viewport:focus-visible{outline-offset:-3px}
+}
+@media(max-width:440px){.ca-tools button{font-size:10px;padding-inline:8px}.ca-arrows{width:100%;margin-left:0;justify-content:center}.ca-active .ca-viewport{height:min(66dvh,540px);min-height:320px}}

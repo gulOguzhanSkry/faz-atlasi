@@ -1,0 +1,375 @@
+{
+  "schema": 1,
+  "scope": "Offline schematic renders of the actual shared runtime model, not UI screenshots or measured micrographs",
+  "quality": "maximum",
+  "grains": 384,
+  "seed": 20261101,
+  "resolution": 512,
+  "invariants": {
+    "otektoid": {
+      "T": 726.531982421875,
+      "G": 0.7615415057455133,
+      "A": 0.01904886542891884,
+      "C": 6.689427018356799
+    },
+    "otektik": {
+      "T": 1148.157958984375,
+      "L": 4.3832951241387486,
+      "G": 2.0540438303459116,
+      "C": 6.689427018356799
+    },
+    "peritektik": {
+      "T": 1494.6142578125,
+      "D": 0.09290696657102547,
+      "L": 0.5273180875300648,
+      "G": 0.17182275361726043
+    },
+    "Fe_alfa_gama": {
+      "T": 911.571044921875
+    },
+    "Fe_gama_delta": {
+      "T": 1394.3377685546875
+    },
+    "Fe_ergime": {
+      "T": 1537.8076171875
+    }
+  },
+  "cases": [
+    {
+      "carbon": 0.2,
+      "temperature": 650,
+      "files": {
+        "phases": {
+          "top": "0-phases-top.rgba",
+          "left": "0-phases-left.rgba",
+          "right": "0-phases-right.rgba"
+        },
+        "constituents": {
+          "top": "0-constituents-top.rgba",
+          "left": "0-constituents-left.rgba",
+          "right": "0-constituents-right.rgba"
+        },
+        "etched": {
+          "top": "0-etched-top.rgba"
+        }
+      },
+      "phases": [
+        {
+          "f": "A",
+          "oran": 0.9713392337271419,
+          "w": 0.00852
+        },
+        {
+          "f": "C",
+          "oran": 0.028660766272858074,
+          "w": 6.68943
+        }
+      ],
+      "parts": [
+        {
+          "id": "proeutectoid-ferrite",
+          "fraction": 0.7551004634937527
+        },
+        {
+          "id": "tertiary-cementite",
+          "fraction": 0.0011918891228003704
+        },
+        {
+          "id": "pearlite",
+          "fraction": 0.2437076473834469
+        }
+      ],
+      "thetaMassFraction": 0.028660766272858074
+    },
+    {
+      "carbon": 0.45,
+      "temperature": 650,
+      "files": {
+        "phases": {
+          "top": "1-phases-top.rgba",
+          "left": "1-phases-left.rgba",
+          "right": "1-phases-right.rgba"
+        },
+        "constituents": {
+          "top": "1-constituents-top.rgba",
+          "left": "1-constituents-left.rgba",
+          "right": "1-constituents-right.rgba"
+        },
+        "etched": {
+          "top": "1-etched-top.rgba"
+        }
+      },
+      "phases": [
+        {
+          "f": "A",
+          "oran": 0.9339191816683655,
+          "w": 0.00852
+        },
+        {
+          "f": "C",
+          "oran": 0.06608081833163448,
+          "w": 6.68943
+        }
+      ],
+      "parts": [
+        {
+          "id": "proeutectoid-ferrite",
+          "fraction": 0.4189274220676933
+        },
+        {
+          "id": "tertiary-cementite",
+          "fraction": 0.0006612564310913239
+        },
+        {
+          "id": "pearlite",
+          "fraction": 0.5804113215012154
+        }
+      ],
+      "thetaMassFraction": 0.06608081833163448
+    },
+    {
+      "carbon": 0.7615415057455133,
+      "temperature": 650,
+      "files": {
+        "phases": {
+          "top": "2-phases-top.rgba",
+          "left": "2-phases-left.rgba",
+          "right": "2-phases-right.rgba"
+        },
+        "constituents": {
+          "top": "2-constituents-top.rgba",
+          "left": "2-constituents-left.rgba",
+          "right": "2-constituents-right.rgba"
+        },
+        "etched": {
+          "top": "2-etched-top.rgba"
+        }
+      },
+      "phases": [
+        {
+          "f": "A",
+          "oran": 0.8872875842144987,
+          "w": 0.00852
+        },
+        {
+          "f": "C",
+          "oran": 0.11271241578550129,
+          "w": 6.68943
+        }
+      ],
+      "parts": [
+        {
+          "id": "pearlite",
+          "fraction": 1
+        }
+      ],
+      "thetaMassFraction": 0.11271241578550129
+    },
+    {
+      "carbon": 1.2,
+      "temperature": 650,
+      "files": {
+        "phases": {
+          "top": "3-phases-top.rgba",
+          "left": "3-phases-left.rgba",
+          "right": "3-phases-right.rgba"
+        },
+        "constituents": {
+          "top": "3-constituents-top.rgba",
+          "left": "3-constituents-left.rgba",
+          "right": "3-constituents-right.rgba"
+        },
+        "etched": {
+          "top": "3-etched-top.rgba"
+        }
+      },
+      "phases": [
+        {
+          "f": "A",
+          "oran": 0.8216590254920362,
+          "w": 0.00852
+        },
+        {
+          "f": "C",
+          "oran": 0.17834097450796382,
+          "w": 6.68943
+        }
+      ],
+      "parts": [
+        {
+          "id": "secondary-cementite",
+          "fraction": 0.07396541200427838
+        },
+        {
+          "id": "pearlite",
+          "fraction": 0.9260345879957216
+        }
+      ],
+      "thetaMassFraction": 0.17834097450796382
+    },
+    {
+      "carbon": 3,
+      "temperature": 650,
+      "files": {
+        "phases": {
+          "top": "4-phases-top.rgba",
+          "left": "4-phases-left.rgba",
+          "right": "4-phases-right.rgba"
+        },
+        "constituents": {
+          "top": "4-constituents-top.rgba",
+          "left": "4-constituents-left.rgba",
+          "right": "4-constituents-right.rgba"
+        },
+        "etched": {
+          "top": "4-etched-top.rgba"
+        }
+      },
+      "phases": [
+        {
+          "f": "A",
+          "oran": 0.552234650668846,
+          "w": 0.00852
+        },
+        {
+          "f": "C",
+          "oran": 0.447765349331154,
+          "w": 6.68943
+        }
+      ],
+      "parts": [
+        {
+          "id": "pearlite",
+          "fraction": 0.4643915776876091
+        },
+        {
+          "id": "secondary-cementite",
+          "fraction": 0.12948815002792632
+        },
+        {
+          "id": "transformed-ledeburite",
+          "fraction": 0.4061202722844646
+        }
+      ],
+      "thetaMassFraction": 0.447765349331154
+    },
+    {
+      "carbon": 4.3832951241387486,
+      "temperature": 650,
+      "files": {
+        "phases": {
+          "top": "5-phases-top.rgba",
+          "left": "5-phases-left.rgba",
+          "right": "5-phases-right.rgba"
+        },
+        "constituents": {
+          "top": "5-constituents-top.rgba",
+          "left": "5-constituents-left.rgba",
+          "right": "5-constituents-right.rgba"
+        },
+        "etched": {
+          "top": "5-etched-top.rgba"
+        }
+      },
+      "phases": [
+        {
+          "f": "A",
+          "oran": 0.3451827484371517,
+          "w": 0.00852
+        },
+        {
+          "f": "C",
+          "oran": 0.6548172515628483,
+          "w": 6.68943
+        }
+      ],
+      "parts": [
+        {
+          "id": "transformed-ledeburite",
+          "fraction": 1
+        }
+      ],
+      "thetaMassFraction": 0.6548172515628483
+    },
+    {
+      "carbon": 5,
+      "temperature": 650,
+      "files": {
+        "phases": {
+          "top": "6-phases-top.rgba",
+          "left": "6-phases-left.rgba",
+          "right": "6-phases-right.rgba"
+        },
+        "constituents": {
+          "top": "6-constituents-top.rgba",
+          "left": "6-constituents-left.rgba",
+          "right": "6-constituents-right.rgba"
+        },
+        "etched": {
+          "top": "6-etched-top.rgba"
+        }
+      },
+      "phases": [
+        {
+          "f": "A",
+          "oran": 0.2528742341986346,
+          "w": 0.00852
+        },
+        {
+          "f": "C",
+          "oran": 0.7471257658013655,
+          "w": 6.68943
+        }
+      ],
+      "parts": [
+        {
+          "id": "primary-cementite",
+          "fraction": 0.2674196031057279
+        },
+        {
+          "id": "transformed-ledeburite",
+          "fraction": 0.7325803968942721
+        }
+      ],
+      "thetaMassFraction": 0.7471257658013655
+    },
+    {
+      "carbon": 4.3832951241387486,
+      "temperature": 900,
+      "files": {
+        "phases": {
+          "top": "7-phases-top.rgba",
+          "left": "7-phases-left.rgba",
+          "right": "7-phases-right.rgba"
+        },
+        "constituents": {
+          "top": "7-constituents-top.rgba",
+          "left": "7-constituents-left.rgba",
+          "right": "7-constituents-right.rgba"
+        },
+        "etched": {
+          "top": "7-etched-top.rgba"
+        }
+      },
+      "phases": [
+        {
+          "f": "G",
+          "oran": 0.4221571731148199,
+          "w": 1.22669
+        },
+        {
+          "f": "C",
+          "oran": 0.5778428268851801,
+          "w": 6.68943
+        }
+      ],
+      "parts": [
+        {
+          "id": "ledeburite",
+          "fraction": 1
+        }
+      ],
+      "thetaMassFraction": 0.5778428268851801
+    }
+  ]
+}
