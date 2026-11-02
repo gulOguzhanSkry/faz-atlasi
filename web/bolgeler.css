@@ -1,0 +1,21 @@
+/* SPDX-License-Identifier: MIT — microconstituent references, not phase borders. */
+.bolgeler-controls{border-bottom:1px solid var(--cizgi);padding:8px 14px;color:var(--soluk);font-size:12px;line-height:1.5;background:var(--yuzey);min-width:0}
+.bolgeler-toggle{display:flex;gap:9px;align-items:center;min-height:36px;font-weight:600;color:var(--metin);cursor:pointer}
+.bolgeler-toggle input{accent-color:var(--vurgu);width:18px;height:18px;flex-shrink:0}
+.bolgeler-controls summary{min-height:32px;cursor:pointer;align-content:center}
+.bolgeler-controls p{margin:8px 0;overflow-wrap:anywhere}
+.bolgeler-scope:empty{display:none}
+.bolgeler-list{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.bolgeler-list button{min-height:44px;white-space:normal;text-align:left;max-width:100%}
+.bolgeler-reference{stroke:var(--soluk);stroke-width:1;stroke-dasharray:4 6;opacity:.5;vector-effect:non-scaling-stroke}
+.bolgeler-letter rect{fill:var(--yuzey);stroke:var(--cizgi)}
+.bolgeler-letter text{fill:var(--soluk);font-size:11px;font-weight:600}
+.bolgeler-region{cursor:pointer;outline:none}
+.bolgeler-region rect{fill:var(--yuzey);fill-opacity:.94;stroke:var(--soluk);stroke-dasharray:3 3;stroke-width:1}
+.bolgeler-region text{fill:var(--soluk);font:italic 11px system-ui,sans-serif}
+.bolgeler-region:hover rect,.bolgeler-region:focus-visible rect{stroke:var(--vurgu);stroke-width:2;stroke-dasharray:none}
+.bolgeler-region:hover text,.bolgeler-region:focus-visible text{fill:var(--metin)}
+.bolgeler-controls :focus-visible{outline:2px solid var(--vurgu);outline-offset:3px}
+.tanitim{padding:6px 14px;background:var(--yuzey);border-bottom:1px solid var(--cizgi);font-size:12px;color:var(--soluk)}
+.tanitim summary{min-height:32px;align-content:center;cursor:pointer}.tanitim video{display:block;width:100%;max-width:720px;height:auto;margin:10px auto;border-radius:8px}.tanitim p{max-width:72ch;margin:8px auto 12px;line-height:1.6}
+@media(max-width:480px){.bolgeler-controls{padding-inline:10px}.bolgeler-toggle{min-height:44px}}
