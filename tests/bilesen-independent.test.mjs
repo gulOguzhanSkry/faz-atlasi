@@ -35,3 +35,13 @@ test('rounded cementite endpoint fallback preserves source phases without invent
  const cementite=q.parts.find(p=>(p.phases.C??0)>.99);
  assert.equal(cementite.id,'cementite');
 });
+
+test('all source-row boundaries and narrow neighbouring fields conserve phase inventories',()=>{
+ let examined=0;
+ for(const row of data.rows)for(const region of row.r)for(const w of [region.x[0]-1e-6,region.x[0],region.x[0]+1e-6,(region.x[0]+region.x[1])/2,region.x[1]-1e-6,region.x[1],region.x[1]+1e-6]){
+  if(w<0||w>data.meta.W_Fe3C||row.T<data.meta.T_min||row.T>data.meta.T_max)continue;
+  const q=M.calculate(w,row.T);check(q,w,row.T);
+  assert.equal(JSON.stringify(q.phases),JSON.stringify(solver(w,row.T).fazlar));examined++;
+ }
+ assert.ok(examined>18000);
+});

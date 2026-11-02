@@ -1,0 +1,41 @@
+{
+  "source": "oguzhan-MME",
+  "three": "0.186.1",
+  "modules": [
+    {
+      "input": "src/domain/phase-atlas/geometry/grain-volume.ts",
+      "output": "tane-hacmi.js",
+      "sha256": "9baaa80cf1625089e98ac21016ac45161a9bb2181821366b4607670db3dfbdd2"
+    },
+    {
+      "input": "src/domain/phase-atlas/geometry/phase-occupancy.ts",
+      "output": "faz-yerlesimi.js",
+      "sha256": "9934ad19f4419dd9803a26dc7eb99c31df9b2d3b891abf5aed8a3557d8b9771a"
+    },
+    {
+      "input": "src/domain/phase-atlas/geometry/constituent-occupancy.ts",
+      "output": "bilesen-yerlesimi.js",
+      "sha256": "7fa170a0ad77d7957cc0be315e9dedbbf2a86ceb748966ec1a32900fcda6c04b"
+    },
+    {
+      "input": "src/domain/phase-atlas/crystal-structures.ts",
+      "output": "kristal-yapilar.js",
+      "sha256": "e1c9a9d66970a4a181a32772ef3c02964b1ec3e1d6195305fd4d065e8e375526"
+    },
+    {
+      "input": "src/domain/phase-atlas/carbon-population.ts",
+      "output": "karbon-yerlesimi.js",
+      "sha256": "758cb88ac3d451d8dee236fe57f72305ac287c457d1d1f4945549b65584d9d8a"
+    },
+    {
+      "input": "src/domain/phase-atlas/coordination-polyhedron.ts",
+      "output": "koordinasyon.js",
+      "sha256": "f3ac22a4964911512e5f7ecd61bbaaae149cb0ea916fa67d098da6d13ba177a4"
+    },
+    {
+      "input": "src/scripts/phase-atlas/AtomicPhaseScene.ts",
+      "output": "atom.js",
+      "sha256": "8b9206001c9e55c63e367017f56029620cbd18e8936c816b495f9bf0f95d61e8"
+    }
+  ]
+}

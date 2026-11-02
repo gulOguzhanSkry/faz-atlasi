@@ -1,0 +1,153 @@
+{
+  "cell": {
+    "a": 5.09,
+    "b": 6.748,
+    "c": 4.523,
+    "alpha": 90,
+    "beta": 90,
+    "gamma": 90
+  },
+  "atoms": [
+    {
+      "element": "C",
+      "position": [
+        0.39,
+        0.25,
+        0.05
+      ]
+    },
+    {
+      "element": "C",
+      "position": [
+        0.10999999999999999,
+        0.75,
+        0.55
+      ]
+    },
+    {
+      "element": "C",
+      "position": [
+        0.61,
+        0.75,
+        0.95
+      ]
+    },
+    {
+      "element": "C",
+      "position": [
+        0.89,
+        0.25,
+        0.45
+      ]
+    },
+    {
+      "element": "Fe",
+      "position": [
+        0.036,
+        0.25,
+        0.852
+      ]
+    },
+    {
+      "element": "Fe",
+      "position": [
+        0.464,
+        0.75,
+        0.35199999999999987
+      ]
+    },
+    {
+      "element": "Fe",
+      "position": [
+        0.964,
+        0.75,
+        0.14800000000000002
+      ]
+    },
+    {
+      "element": "Fe",
+      "position": [
+        0.536,
+        0.25,
+        0.648
+      ]
+    },
+    {
+      "element": "Fe",
+      "position": [
+        0.186,
+        0.063,
+        0.328
+      ]
+    },
+    {
+      "element": "Fe",
+      "position": [
+        0.314,
+        0.937,
+        0.8280000000000001
+      ]
+    },
+    {
+      "element": "Fe",
+      "position": [
+        0.8140000000000001,
+        0.563,
+        0.6719999999999999
+      ]
+    },
+    {
+      "element": "Fe",
+      "position": [
+        0.6859999999999999,
+        0.437,
+        0.172
+      ]
+    },
+    {
+      "element": "Fe",
+      "position": [
+        0.8140000000000001,
+        0.937,
+        0.6719999999999999
+      ]
+    },
+    {
+      "element": "Fe",
+      "position": [
+        0.6859999999999999,
+        0.063,
+        0.172
+      ]
+    },
+    {
+      "element": "Fe",
+      "position": [
+        0.186,
+        0.437,
+        0.328
+      ]
+    },
+    {
+      "element": "Fe",
+      "position": [
+        0.314,
+        0.563,
+        0.8280000000000001
+      ]
+    }
+  ],
+  "source": {
+    "provider": "AFLOW prototype encyclopedia",
+    "recordId": "AB3_oP16_62_c_cd-001",
+    "url": "https://aflow.org/p/AB3_oP16_62_c_cd-001/",
+    "citation": "Hicks et al., Computational Materials Science 199 (2021) 110450; Herbstein & Smuts, Acta Cryst.17 (1964) 1331–1332",
+    "license": "Source-linked factual coordinates; original source attribution retained",
+    "originalCifPath": "docs/education/heat-treatment/research/crystals/cementite-aflow.cif",
+    "sha256": "89a04731c6b8d5e32d002bb7f9eab663740e6e0c33812e92bb735d6baeb5a36a",
+    "retrievedAt": "2026-11-01",
+    "kind": "idealized",
+    "normalizedInputSha256": "cf120a4937a5d47918ca95f615efafbf75a3fdc3e5fcb99d2b6c7fb3c73eb4a5",
+    "normalization": "Added chemical_formula_sum Fe3 C from named prototype; coordinates and symmetry unchanged"
+  }
+}

@@ -138,6 +138,12 @@ if(typeof document!=='undefined'&&typeof KANCA!=='undefined')(()=>{
   let progressKey='',controlsKey='',xi,open=false;
   const binary=()=>!KAYNAK.alt&&!Object.values(st.alas||{}).some(x=>x!==0);
   const pointKey=()=>`${st.C}:${st.T}`;
+  engine.setProgress=value=>{
+    if(value!==undefined&&(!Number.isFinite(value)||value<0||value>1))return false;
+    progressKey=pointKey();xi=value;
+    const range=progressHost.querySelector('input');if(range&&value!==undefined)range.value=String(value);
+    guncelle();return true;
+  };
   // One resolved state is shared by the source phase card and the constituent
   // card at an invariant. Without ξ, hide the ambiguous source fraction card.
   durum=function(w,T){
