@@ -3,7 +3,7 @@
 import {readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {runInNewContext} from 'node:vm';
-const source=await readFile(new URL('../web/app.js',import.meta.url),'utf8');
+const source=(await readFile(new URL('../web/app.js',import.meta.url),'utf8')).replace(/\r\n/g,'\n');
 const query=source.split('/* ---------- veri sorgusu ---------- */')[1]?.split('/* ---------- çizim ---------- */')[0];
 if(!query||!query.includes('function durum(')||!query.includes('function gecisler('))throw new Error('Upstream query markers changed; inspect before updating');
 const hash=createHash('sha256').update(query).digest('hex');

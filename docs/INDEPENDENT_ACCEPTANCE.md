@@ -10,7 +10,7 @@ npm test
 node tests/benchmark-mikroyapi.mjs
 ```
 
-Latest complete automated run: **31 passed, 0 failed, 0 skipped**, including the final 192-grain runtime default, exact-source-boundary playback stop, offscreen-export and minimise/reopen preservation changes. Tests use `node:test`, `linkedom` and native ES modules. The original `web/app.js` query code is executed in a VM; no synthetic replacement phase solver is used. Browser visual checks and publication are owned by the coordinating agent.
+Latest complete automated runs after the CI portability correction: **33 passed, 0 failed, 0 skipped** in the Windows working tree, and **33/33 passed** again in a temporary LF-only copy. Coverage includes the final 192-grain runtime default, exact-source-boundary playback stop, offscreen export, minimise/reopen preservation and canonical provenance hashes. Tests use `node:test`, `linkedom` and native ES modules. The original `web/app.js` query code is executed in a VM; no synthetic replacement phase solver is used. Browser visual checks and publication are owned by the coordinating agent.
 
 ## Evidence
 
@@ -39,6 +39,16 @@ In the portfolio checkout, `tests/fork-atlas-engine-independent.test.ts` covers 
 
 1. Source rounding at the cementite endpoint can produce a tiny companion phase. A fallback previously labelled its approximately 100% cementite as tertiary cementite. The coordinating agent changed this to neutral cementite with ancestry unassigned; a regression test preserves the source inventory and neutral label.
 2. Hot-state warnings overflowed the fixed-height PNG information strip. The 2D implementation agent made strip height depend on wrapped text; six language/resolution regression cases now pass.
+
+## Cross-platform CI correction
+
+The initial v1.2.0 Windows run passed 31/31 locally, but the coordinator reported Linux GitHub Actions at 30/31: the trace report compared a hash of a CRLF working file with an LF Git checkout. The earlier local pass therefore did not establish cross-platform reproducibility.
+
+The revised text-hash contract is explicit: `UTF-8 text with LF line endings (Git text normalization)`. The independent test normalizes CRLF to LF, asserts the report's declared `hashBasis`, checks LF/CRLF equivalence, and proves that an actual numeric content change still changes the hash. The original numerical guard remains: every recorded boundary pair, carbon difference and branch maximum must agree with the actual original source query.
+
+The additional provenance audit compared working files with Git objects. Six of seven research-JSON manifest entries contained Windows byte hashes/counts that differed from Git LF blobs. The seven preserved module entries mixed LF and CRLF provenance. These text manifests are now subject to the same declared canonical-LF hash checks, with canonical UTF-8 byte counts where recorded. External database/TDB raw provenance hashes remain raw-file identities; they must not be silently reinterpreted as normalized text hashes. Pinned release-artifact manifests likewise retain their declared byte-exact artifact meaning.
+
+`node tests/verify-lf-checkout.mjs` constructed a temporary LF-only copy of 178 current nonignored files, normalizing 159 text files while preserving binary media, and ran the actual suite there: **33/33 passed**. The normal Windows working tree independently passed **33/33**. The diagnostic reused only the installed development dependencies and removed its temporary copy afterward. These runs reproduce the checkout line-ending condition on the development machine; they are not a Linux OS test. The coordinator owns the replacement `v1.2.1` pin and actual GitHub Actions rerun; no successful remote rerun is claimed here before verification.
 
 ## Remaining acceptance limits
 

@@ -35,7 +35,8 @@
     {
       "input": "src/scripts/phase-atlas/AtomicPhaseScene.ts",
       "output": "atom.js",
-      "sha256": "8b9206001c9e55c63e367017f56029620cbd18e8936c816b495f9bf0f95d61e8"
+      "sha256": "69a39c9a2404bb51b7a893e126cd576001b213bd03afde1aa8ddceebe159a00e"
     }
-  ]
+  ],
+  "hashBasis": "UTF-8 text with LF line endings (Git text normalization)"
 }

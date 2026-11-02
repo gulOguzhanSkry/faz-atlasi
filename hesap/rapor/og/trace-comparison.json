@@ -1,7 +1,8 @@
 {
   "schema": 1,
+  "hashBasis": "UTF-8 text with LF line endings (Git text normalization)",
   "scope": "Numerical source-table vs traced-pack comparison; same Fei–Brosh assessment, not experimental validation",
-  "sourceQuerySha256": "497e481f375ed2c489f422cbb0785eef9232fa61f584c66804f22145abcae239",
+  "sourceQuerySha256": "8324e31e33964e0409ac176ee3a0a48f4328fbf8ebd53672a7a67662a28598ab",
   "sourceDataSha256": "eca3c63aa99aaf480a48e0a8259c48a8848c29696d73fe3dc3b9ae3907dfb875",
   "candidateSha256": "052fe20d6bfc610eb2983c47ae55d4b39492b646cde1e63304b13d3c03067f85",
   "candidateRevision": "fei-brosh-traced-r01-scoped",
