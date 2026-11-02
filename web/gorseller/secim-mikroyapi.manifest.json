@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "scope": "Source-calculated explanatory diagram, not a captured web interface or kinetic simulation",
+  "carbon": 0.45,
+  "grains": 384,
+  "resolution": 512,
+  "states": [
+    {
+      "temperature": 900,
+      "phases": [
+        {
+          "f": "G",
+          "oran": 1,
+          "w": 0.45
+        }
+      ],
+      "parts": [
+        {
+          "id": "austenite",
+          "fraction": 1,
+          "phases": {
+            "G": 1
+          }
+        }
+      ],
+      "files": {
+        "top": "900-top.rgba",
+        "left": "900-left.rgba",
+        "right": "900-right.rgba"
+      }
+    },
+    {
+      "temperature": 780,
+      "phases": [
+        {
+          "f": "G",
+          "oran": 1,
+          "w": 0.45
+        }
+      ],
+      "parts": [
+        {
+          "id": "austenite",
+          "fraction": 1,
+          "phases": {
+            "G": 1
+          }
+        }
+      ],
+      "files": {
+        "top": "780-top.rgba",
+        "left": "780-left.rgba",
+        "right": "780-right.rgba"
+      }
+    },
+    {
+      "temperature": 740,
+      "phases": [
+        {
+          "f": "A",
+          "oran": 0.3352146031648392,
+          "w": 0.01771
+        },
+        {
+          "f": "G",
+          "oran": 0.6647853968351608,
+          "w": 0.66798
+        }
+      ],
+      "parts": [
+        {
+          "id": "proeutectoid-ferrite",
+          "fraction": 0.3352146031648392,
+          "phases": {
+            "A": 0.3352146031648392
+          }
+        },
+        {
+          "id": "austenite",
+          "fraction": 0.6647853968351608,
+          "phases": {
+            "G": 0.6647853968351608
+          }
+        }
+      ],
+      "files": {
+        "top": "740-top.rgba",
+        "left": "740-left.rgba",
+        "right": "740-right.rgba"
+      }
+    },
+    {
+      "temperature": 650,
+      "phases": [
+        {
+          "f": "A",
+          "oran": 0.9339191816683655,
+          "w": 0.00852
+        },
+        {
+          "f": "C",
+          "oran": 0.06608081833163448,
+          "w": 6.68943
+        }
+      ],
+      "parts": [
+        {
+          "id": "proeutectoid-ferrite",
+          "phases": {
+            "A": 0.4189274220676933
+          },
+          "fraction": 0.4189274220676933
+        },
+        {
+          "id": "tertiary-cementite",
+          "phases": {
+            "C": 0.0006612564310913239
+          },
+          "fraction": 0.0006612564310913239
+        },
+        {
+          "id": "pearlite",
+          "phases": {
+            "A": 0.5149917596006722,
+            "C": 0.06541956190054316
+          },
+          "fraction": 0.5804113215012154
+        }
+      ],
+      "files": {
+        "top": "650-top.rgba",
+        "left": "650-left.rgba",
+        "right": "650-right.rgba"
+      }
+    }
+  ]
+}

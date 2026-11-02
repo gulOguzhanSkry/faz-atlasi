@@ -11,7 +11,7 @@
   'kup.loading':['3B ve kesit modülleri hazırlanıyor…','Preparing 3D and section modules…'],
   'kup.unavailable':['Hesap çözülmedi. Önce diyagramda geçerli bir nokta veya değişmezde ξ seçin.','Unresolved state. Select a valid diagram point or choose ξ at an invariant.'],
   'kup.alloy':['Yalnız ikili Fe–Fe₃C. Alaşımlı kesitte kapalı.','Binary Fe–Fe₃C only. Disabled for alloy isopleths.'],
-  'kup.scope':['Şematik · ölçeksiz · kütle paylarının çizimi. Kinetik veya ölçülmüş mikrograf değildir.','Schematic · unscaled · drawing of mass fractions. Not kinetics or a measured micrograph.'],
+  'kup.scope':['Şematik · ölçeksiz · kütle paylarının çizimi. İnce çizgiler geometrik tane sınırlarıdır, yeni faz değildir. Kinetik veya ölçülmüş mikrograf değildir.','Schematic · unscaled · drawing of mass fractions. Thin lines are geometric grain boundaries, not another phase. Not kinetics or a measured micrograph.'],
   'kup.scale':['Görünüm ölçeği','Viewing scale'],
   'kup.volume':['Tane hacmi ve kesit','Grain volume and section'],
   'kup.atomic':['Atomik yapı / kristal hücresi','Atomic structure / crystal cell'],
@@ -107,7 +107,7 @@
    if(!dialog.open)dialog.showModal();opened=true;dock.hidden=true;if(!controller)summary.textContent=t('kup.loading');
    try{
      if(!controller){
-       loading??=import('./kup.js');const module=await loading;
+       loading??=import('./kup.js?v=1.2.2');const module=await loading;
        controller=module.mountCube(dialog,{t,register:sozlukEkle,lang:DIL,getState:state,sourceData:D,selectTemperature:T=>sec(null,T),boundaries:C=>gecisler(C).map(g=>g.T)});
      }
      controller.open();controller.setState(state());

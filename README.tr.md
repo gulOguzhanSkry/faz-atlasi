@@ -9,7 +9,7 @@
 Fe–C dengesini incele, bileşen hesabının izini sür.<br>
 Aynı yapıyı 3B kesitten atomik referans hücresine kadar keşfet.
 
-[![Sürüm v1.2.1](https://img.shields.io/badge/s%C3%BCr%C3%BCm-v1.2.1-526e60?style=flat-square)](https://github.com/gulOguzhanSkry/faz-atlasi/tree/v1.2.1)
+[![Sürüm v1.2.2](https://img.shields.io/badge/s%C3%BCr%C3%BCm-v1.2.2-526e60?style=flat-square)](https://github.com/gulOguzhanSkry/faz-atlasi/tree/v1.2.2)
 [![Kod lisansı MIT](https://img.shields.io/badge/kod-MIT-a77850?style=flat-square)](LICENSE)
 ![Türkçe ve İngilizce](https://img.shields.io/badge/diller-TR%20%2F%20EN-657f99?style=flat-square)
 ![Şematik araştırma prototipi](https://img.shields.io/badge/model-%C5%9Fematik%20prototip-85719c?style=flat-square)
@@ -25,6 +25,18 @@ Aynı yapıyı 3B kesitten atomik referans hücresine kadar keşfet.
 </div>
 
 ---
+
+## Diyagramdaki seçim, mikroyapıyı anlık günceller
+
+**Küp, önceden seçilmiş sabit bir görsel değildir.** Diyagramda karbon veya sıcaklık değiştiğinde, seçilen C/T noktası kaynak denge hesabına gider. Faz ve bileşen miktarları yeniden hesaplanır; 3B küpün faz/bileşen yerleşimi ve aynı hacimden alınan kesit bu duruma göre güncellenir.
+
+[![Sabit yüzde 0,45 karbonda sıcaklık noktası değiştikçe kaynak faz hesabı ve aynı modelin 3B mikroyapısı birlikte güncelleniyor](web/gorseller/secim-mikroyapi.gif)](https://guloguzhanskry.github.io/faz-atlasi/?lang=tr)
+
+**Nokta seç → faz ve bileşen paylarını hesapla → küpü ve kesiti güncelle.** Yukarıdaki açıklama animasyonunda C=%0,45 sabittir; seçili sıcaklık 900, 780, 740 ve 650 °C arasında değişir. Her karedeki yüzdeler ve 384 taneli küp aynı kaynak hesap durumundan üretilmiştir.
+
+[900 ve 650 °C karşılaştırmasını büyük aç](web/gorseller/secim-mikroyapi.webp) · [Canlı uygulamada kendin dene](https://guloguzhanskry.github.io/faz-atlasi/?lang=tr)
+
+<sub>Bu görsel hesap bağlantısını anlatan şematik bir çizimdir; web arayüzünün ekran görüntüsü veya fiziksel dönüşüm süresi simülasyonu değildir. Faz payları hesaplanır; tanelerin ve lamellerin geometrisi şematiktir.</sub>
 
 ## Uygulamada ne göreceğim?
 

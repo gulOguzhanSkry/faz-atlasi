@@ -112,6 +112,13 @@ export function renderSlicePixels(slice,options={}){
    }
    colour=[tone,tone,tone];
   }
+  // Same phase does not mean same grain. Show the existing 3D grain ownership
+  // on solid phase/constituent views as a thin presentation overlay. A line is
+  // not a second phase or a cementite film; all identity maps remain unchanged.
+  const samePhaseGrainEdge=(sx>0&&source.grainLabels[s-1]!==grain&&source.phaseLabels[s-1]===p)
+    ||(sy>0&&source.grainLabels[s-width]!==grain&&source.phaseLabels[s-width]===p);
+  if(options.boundaries!==false&&mode!=='etched'&&phase&&phase!=='L'&&samePhaseGrainEdge)
+    colour=colour.map(channel=>channel*.58);
   const n=i*4;pixels[n]=clamp(colour[0]);pixels[n+1]=clamp(colour[1]);pixels[n+2]=clamp(colour[2]);pixels[n+3]=255;
  }
  return {width,height,pixels,phaseLabels,partLabels,grainLabels,sourceIndices,phaseCodes:source.phaseCodes,partIds:source.partIds,mode,magnification,warning,seed};

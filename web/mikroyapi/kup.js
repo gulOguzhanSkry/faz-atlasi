@@ -2,7 +2,7 @@
 import * as THREE from '../vendor/three/three.module.min.js';
 import {OrbitControls} from '../vendor/three/OrbitControls.js';
 import {createModel,PHASE_COLORS,CONSTITUENT_COLORS} from './model.js';
-import {renderSlice,saveSlicePNG,registerSliceTranslations} from './kesit2d.js';
+import {renderSlice,saveSlicePNG,registerSliceTranslations} from './kesit2d.js?v=1.2.2';
 import {drawAtomicPhase} from './atom.js';
 import {phaseCrystal} from './kristal-yapilar.js';
 import {carbonPopulation} from './karbon-yerlesimi.js';

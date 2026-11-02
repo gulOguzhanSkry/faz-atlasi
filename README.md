@@ -9,7 +9,7 @@
 Explore Fe–C equilibrium, follow the constituent budgets,<br>
 and look inside the same structure — from a 3D section to an atomic reference.
 
-[![Release v1.2.1](https://img.shields.io/badge/release-v1.2.1-526e60?style=flat-square)](https://github.com/gulOguzhanSkry/faz-atlasi/tree/v1.2.1)
+[![Release v1.2.2](https://img.shields.io/badge/release-v1.2.2-526e60?style=flat-square)](https://github.com/gulOguzhanSkry/faz-atlasi/tree/v1.2.2)
 [![Code licence MIT](https://img.shields.io/badge/code-MIT-a77850?style=flat-square)](LICENSE)
 ![Languages TR and EN](https://img.shields.io/badge/languages-TR%20%2F%20EN-657f99?style=flat-square)
 ![Schematic research prototype](https://img.shields.io/badge/model-schematic%20prototype-85719c?style=flat-square)
@@ -25,6 +25,18 @@ and look inside the same structure — from a 3D section to an atomic reference.
 </div>
 
 ---
+
+## The diagram selection updates the microstructure live
+
+**The cube is not a fixed, preselected illustration.** Changing carbon or temperature sends the selected C/T point to the source equilibrium calculation. Phase and constituent amounts are recalculated; the 3D phase/constituent arrangement and the section of that same volume update to represent the new state.
+
+[![At fixed 0.45 wt% carbon, changing the selected temperature updates the source phase calculation and the shared 3D microstructure together](web/gorseller/secim-mikroyapi-en.gif)](https://guloguzhanskry.github.io/faz-atlasi/?lang=en)
+
+**Select a point → calculate phase and constituent amounts → update the cube and section.** This explanatory animation holds C at 0.45 wt% while the selected temperature changes through 900, 780, 740 and 650 °C. Every frame's percentages and 384-grain cube come from the same source-calculated state.
+
+[Open the large 900 vs 650 °C comparison](web/gorseller/secim-mikroyapi-en.webp) · [Try the live application](https://guloguzhanskry.github.io/faz-atlasi/?lang=en)
+
+<sub>This is a schematic explanation of the calculation link, not a captured web interface or a physical transformation-time simulation. Phase fractions are calculated; grain and lamellar geometry is illustrative.</sub>
 
 ## What will I see in the application?
 
