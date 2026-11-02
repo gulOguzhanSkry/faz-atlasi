@@ -2,7 +2,7 @@
  * The placement preserves source MASS budgets as illustrative voxel occupancy;
  * it is not a physical volume fraction or kinetic/phase-field simulation. */
 import {GrainVolume,generateGrainSeeds} from './tane-hacmi.js';
-import {ConstituentOccupancy,CONSTITUENT_COLORS,isFerriteBand} from './bilesen-yerlesimi.js?v=1.3.0';
+import {ConstituentOccupancy,CONSTITUENT_COLORS,isFerriteBand} from './bilesen-yerlesimi.js?v=1.3.1';
 import {PhaseOccupancy,PHASE_COLORS} from './faz-yerlesimi.js';
 export {CONSTITUENT_COLORS,PHASE_COLORS};
 export const QUALITY={economy:{grains:24,surface:64,occupancy:24,distance:.12},balanced:{grains:96,surface:128,occupancy:32,distance:.07},fine:{grains:192,surface:192,occupancy:40,distance:.055},maximum:{grains:384,surface:256,occupancy:48,distance:.04}};
@@ -34,7 +34,9 @@ export function createModel(options={}){
    result=next;carbon=w;temperature=T;cache.clear();revision++;
    const adapted=adaptState(next,w,T,options.invariants);valid=Boolean(adapted);if(!valid){active=null;return false;}
    try{
-     if(next.basis==='slow-cooling'){
+     // Solid-state grain-boundary states (also above A1, e.g. α+γ or γ+θ) use the constituent engine,
+     // so ferrite grains, facet thickness and boundary rules match the slow-cooled view.
+     if(next.basis==='slow-cooling'||adapted.breakdown.arrangement==='grain-boundary'){
        constituent??=new ConstituentOccupancy(volume,config.occupancy,config.surface);
        constituent.apply(adapted.phaseResult,adapted.breakdown);active=constituent;
      }else{

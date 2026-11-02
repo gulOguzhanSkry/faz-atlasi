@@ -1,8 +1,8 @@
 /* SPDX-License-Identifier: MIT — on-demand Three.js inspector. */
 import * as THREE from '../vendor/three/three.module.min.js';
 import {OrbitControls} from '../vendor/three/OrbitControls.js';
-import {createModel,PHASE_COLORS,CONSTITUENT_COLORS} from './model.js?v=1.3.0';
-import {renderSlice,saveSlicePNG,registerSliceTranslations} from './kesit2d.js?v=1.3.0';
+import {createModel,PHASE_COLORS,CONSTITUENT_COLORS} from './model.js?v=1.3.1';
+import {renderSlice,saveSlicePNG,registerSliceTranslations} from './kesit2d.js?v=1.3.1';
 import {drawAtomicPhase,drawAtomicLesson,LESSON_COLORS} from './atom.js';
 import {phaseCrystal,cellShareCount,packingFraction,coordinationNumber,interstitialSummary,radiiAngstrom,CARBON_RADIUS_ANGSTROM} from './kristal-yapilar.js';
 import {lessonSteps} from './atom-dersleri.js';

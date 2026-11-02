@@ -153,7 +153,7 @@
    if(!dialog.open)dialog.showModal();opened=true;dock.hidden=true;if(!controller)summary.textContent=t('kup.loading');
    try{
      if(!controller){
-       loading??=import('./kup.js?v=1.3.0');const module=await loading;
+       loading??=import('./kup.js?v=1.3.1');const module=await loading;
        controller=module.mountCube(dialog,{t,register:sozlukEkle,lang:DIL,getState:state,sourceData:D,selectTemperature:T=>sec(null,T),boundaries:C=>gecisler(C).map(g=>g.T)});
      }
      controller.open();controller.setState(state());

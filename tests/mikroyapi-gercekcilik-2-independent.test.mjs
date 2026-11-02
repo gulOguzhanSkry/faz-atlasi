@@ -59,3 +59,10 @@ test('magnified sections are resampled, and identity maps still come from the mo
  const legacy={width:4,height:4,phaseCodes:['A'],partIds:['ferrite'],phaseLabels:new Uint8Array(16),partLabels:new Uint16Array(16),grainLabels:Uint32Array.from({length:16},(_,i)=>i),temperature:650,eutectoidTemperature:727};
  assert.notDeepEqual(Array.from(renderSlicePixels(legacy,{magnification:'high'}).sourceIndices),Array.from({length:16},(_,i)=>i));
 });
+
+test('above A1 (α + γ) ferrite uses the same rules: own grains, no prior γ boundary through it',()=>{
+ const m=model(.209,737.6578),cut=m.slice('z',1,128),ferrite=cut.partIds.indexOf('proeutectoid-ferrite');
+ assert.ok(ferrite>=0&&cut.phaseCodes.includes('G'),'intercritical state');
+ let n=0;for(let i=0;i<cut.partLabels.length;i++)if(cut.partLabels[i]===ferrite){n++;assert.ok(cut.boundaryLabels[i]&FERRITE);}
+ assert.ok(n>cut.partLabels.length*.4);
+});
